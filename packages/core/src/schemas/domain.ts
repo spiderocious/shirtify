@@ -11,6 +11,27 @@ import { ShirtTypeSchema, SceneSchema } from './scene.js';
 export const SellerRole = z.enum(['seller', 'admin']);
 export type SellerRole = z.infer<typeof SellerRole>;
 
+/**
+ * A shirt base colour. Colours are data, not a hardcoded enum: platform colours
+ * (scope 'platform', seeded defaults, available to everyone) plus per-seller
+ * colours (scope 'seller', her own stock). `shirt_color` on a session must match
+ * a colour id available to that session's seller (platform ∪ her own).
+ */
+export const ColorScope = z.enum(['platform', 'seller']);
+export type ColorScope = z.infer<typeof ColorScope>;
+
+export const ColorSchema = z.object({
+  id: z.string(),
+  scope: ColorScope,
+  seller_id: z.string().nullable(),
+  /** Stable slug used as `shirt_color` (e.g. "white", "lime"). */
+  slug: z.string(),
+  label: z.string(),
+  hex: z.string(),
+  created_at: z.string(),
+});
+export type Color = z.infer<typeof ColorSchema>;
+
 export const BrandColors = z.object({
   primary: z.string(),
   accent: z.string(),

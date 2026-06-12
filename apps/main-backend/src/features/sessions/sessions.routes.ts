@@ -22,7 +22,9 @@ router.post(
   '/',
   asyncHandler(async (req, res) => {
     const body = CreateSessionBody.parse(req.body);
-    const session = await createSession(currentSellerId(), body);
+    const rawKey = req.get('Idempotency-Key');
+    const idempotencyKey = rawKey && rawKey.trim().length > 0 ? rawKey.trim() : undefined;
+    const session = await createSession(currentSellerId(), body, idempotencyKey);
     return ResponseUtil.created(res, { session });
   }),
 );

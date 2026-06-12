@@ -3,16 +3,19 @@ import {
   SessionSchema,
   DesignSchema,
   AssetSchema,
+  ColorSchema,
   type Seller,
   type Session,
   type Design,
   type Asset,
+  type Color,
 } from '@shirtify/core';
 
 import type { SellerDoc } from '@db/models/seller.model.js';
 import type { SessionDoc } from '@db/models/session.model.js';
 import type { DesignDoc } from '@db/models/design.model.js';
 import type { AssetDoc } from '@db/models/asset.model.js';
+import type { ColorDoc } from '@db/models/color.model.js';
 import type { SellerRecord } from '@repos/ports.js';
 
 /**
@@ -79,5 +82,16 @@ export const toAsset = (doc: AssetDoc): Asset =>
     width: doc.width ?? null,
     height: doc.height ?? null,
     bytes: doc.bytes ?? null,
+    created_at: iso(doc.created_at) ?? new Date().toISOString(),
+  });
+
+export const toColor = (doc: ColorDoc): Color =>
+  ColorSchema.parse({
+    id: doc._id.toString(),
+    scope: doc.scope,
+    seller_id: doc.seller_id ? doc.seller_id.toString() : null,
+    slug: doc.slug,
+    label: doc.label,
+    hex: doc.hex,
     created_at: iso(doc.created_at) ?? new Date().toISOString(),
   });

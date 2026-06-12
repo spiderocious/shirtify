@@ -8,6 +8,7 @@ import {
   type PaginatedResult,
 } from '@shirtify/core';
 
+import { assertColorAvailable } from '@features/colors/colors.service.js';
 import { NotFoundError } from '@lib/errors.js';
 import { getRepos } from '@repos/index.js';
 
@@ -25,8 +26,29 @@ const uniqueToken = async (): Promise<string> => {
 export const createSession = async (
   sellerId: string,
   input: CreateSessionBody,
+  idempotencyKey?: string,
 ): Promise<Session> => {
   const repos = getRepos();
+
+  // Idempotency: a retried request with the same key returns the original
+  // session instead of creating a duplicate (BUG-04).
+  if (idempotencyKey) {
+    const existingId = await repos.idempotency.lookup(sellerId, 'create_session', idempotencyKey);
+    if (existingId) {
+      const existing = await repos.sessions.byId(existingId);
+      if (existing) return existing;
+    }
+  }
+
+  // Validate the base colour (and any allowed-colour options) against the
+  // seller's catalogue (platform ∪ her own) — out-of-catalogue colours rejected.
+  await assertColorAvailable(sellerId, input.shirt_color);
+  if (input.allowed_colors) {
+    for (const slug of input.allowed_colors) {
+       
+      await assertColorAvailable(sellerId, slug);
+    }
+  }
   const token = await uniqueToken();
   const session = await repos.sessions.create({
     seller_id: sellerId,
@@ -45,6 +67,23 @@ export const createSession = async (
     emptyScene(session.shirt_type, session.shirt_color),
     emptyScene(session.shirt_type, session.shirt_color),
   );
+
+  if (idempotencyKey) {
+    const recorded = await repos.idempotency.record(
+      sellerId,
+      'create_session',
+      idempotencyKey,
+      session.id,
+    );
+    // Lost a race: another request recorded first — return its session.
+    if (!recorded) {
+      const winnerId = await repos.idempotency.lookup(sellerId, 'create_session', idempotencyKey);
+      if (winnerId && winnerId !== session.id) {
+        const winner = await repos.sessions.byId(winnerId);
+        if (winner) return winner;
+      }
+    }
+  }
   return session;
 };
 

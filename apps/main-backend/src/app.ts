@@ -4,6 +4,7 @@ import express from 'express';
 import helmet from 'helmet';
 
 import { register as registerAuth } from '@features/auth/index.js';
+import { register as registerColors } from '@features/colors/index.js';
 import { register as registerHealth } from '@features/health/index.js';
 import { register as registerNotifications } from '@features/notifications/index.js';
 import { register as registerPublic } from '@features/public/index.js';
@@ -19,6 +20,7 @@ import { env } from './env.js';
 const features = [
   registerHealth,
   registerAuth,
+  registerColors,
   registerNotifications,
   registerSessions,
   registerStorefront,

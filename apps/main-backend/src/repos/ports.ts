@@ -3,6 +3,7 @@ import type {
   Session,
   Design,
   Asset,
+  Color,
   Scene,
   SessionKind,
   SessionStatus,
@@ -112,11 +113,40 @@ export interface PushSubscriptionRepo {
   removeByEndpoint(endpoint: string): Promise<void>;
 }
 
+export interface NewColor {
+  scope: 'platform' | 'seller';
+  seller_id?: string;
+  slug: string;
+  label: string;
+  hex: string;
+}
+
+export interface ColorRepo {
+  /** Platform colours + the seller's own (the set available on her sessions). */
+  listForSeller(sellerId: string): Promise<Color[]>;
+  /** Platform colours only (for callers without a seller). */
+  listPlatform(): Promise<Color[]>;
+  create(input: NewColor): Promise<Color>;
+  bySellerAndId(sellerId: string, id: string): Promise<Color | null>;
+  remove(id: string): Promise<void>;
+  /** Idempotent seed helper: insert a platform colour only if its slug is free. */
+  ensurePlatform(input: Omit<NewColor, 'scope' | 'seller_id'>): Promise<void>;
+}
+
+export interface IdempotencyRepo {
+  /** Returns the stored result id for a prior (seller, operation, key), or null. */
+  lookup(sellerId: string, operation: string, key: string): Promise<string | null>;
+  /** Records the result id. Returns false if the key already existed (race). */
+  record(sellerId: string, operation: string, key: string, resultId: string): Promise<boolean>;
+}
+
 /** The full set of repositories, injected into services as one bag. */
 export interface Repositories {
   sellers: SellerRepo;
   sessions: SessionRepo;
   designs: DesignRepo;
   assets: AssetRepo;
+  colors: ColorRepo;
+  idempotency: IdempotencyRepo;
   pushSubscriptions: PushSubscriptionRepo;
 }

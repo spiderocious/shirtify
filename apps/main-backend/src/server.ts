@@ -4,10 +4,12 @@ import { logger } from '@lib/logger.js';
 
 import { buildApp } from './app.js';
 import { connectDb, disconnectDb } from './db/connection.js';
+import { seedPlatformColors } from './db/seed-colors.js';
 import { env } from './env.js';
 
 const startHttpApp = async (): Promise<Server> => {
   await connectDb(env.MONGODB_URI);
+  await seedPlatformColors();
   const app = buildApp();
   const server = createServer(app);
   server.listen(env.PORT, () => {

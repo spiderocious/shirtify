@@ -3,6 +3,8 @@ import { createMongoSellerRepo } from './mongo/seller.repo.js';
 import { createMongoSessionRepo } from './mongo/session.repo.js';
 import { createMongoDesignRepo } from './mongo/design.repo.js';
 import { createMongoAssetRepo } from './mongo/asset.repo.js';
+import { createMongoColorRepo } from './mongo/color.repo.js';
+import { createMongoIdempotencyRepo } from './mongo/idempotency.repo.js';
 import { createMongoPushSubscriptionRepo } from './mongo/push-subscription.repo.js';
 
 /**
@@ -19,6 +21,8 @@ export const getRepos = (): Repositories => {
       sessions: createMongoSessionRepo(),
       designs: createMongoDesignRepo(),
       assets: createMongoAssetRepo(),
+      colors: createMongoColorRepo(),
+      idempotency: createMongoIdempotencyRepo(),
       pushSubscriptions: createMongoPushSubscriptionRepo(),
     };
   }
