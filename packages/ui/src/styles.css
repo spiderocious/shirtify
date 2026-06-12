@@ -1,18 +1,121 @@
-/* Optional shared base styles. Apps can import this from `@repo/ui/styles.css`
-   on top of their own Tailwind layer. Mirror the tokens in
-   packages/ui/src/theme/index.ts when re-theming. */
+/* Shirtify shared base styles + design tokens.
+   Stance: #28 Neobrutalist pop. Mirrors
+   design-system/projects/shirtify/preview/_foundation.css.
+   Apps import this via `@repo/ui/styles.css` on top of their Tailwind layer.
+
+   Fonts are self-hosted via @fontsource (imported in each app's main.tsx):
+   @fontsource/archivo-black, @fontsource/archivo, @fontsource/space-grotesk,
+   @fontsource/jetbrains-mono. */
 
 :root {
-  --brand: #1e3a8a;
-  --brand-strong: #1d4ed8;
-  --surface: #f8fafc;
-  --accent: #ea580c;
-  --ink: #0f172a;
+  /* Paper & ink */
+  --paper: #fbf7ec;
+  --paper-warm: #fffdf7;
+  --paper-deep: #f2ecdd;
+  --ink: #16140f;
+  --ink-2: #403b31;
+  --ink-3: #7a7263;
+  --ink-4: #a79e8c;
+
+  /* The four loud flats — each owns one job, never overlap */
+  --lime: #c6f24e; /* GO / primary */
+  --lime-deep: #aedc34;
+  --lime-ink: #2e3a06; /* text on lime */
+  --blue: #1f6bff; /* AI / magic */
+  --blue-deep: #1657db;
+  --blue-tint: #e5eeff;
+  --tomato: #ff5252; /* warn */
+  --tomato-tint: #ffe7e3;
+  --crit: #d11a1a; /* irreversible action only */
+  --crit-tint: #fbe3e0;
+  --go-tint: #eef9cf;
+
+  /* Halftone print texture — dark zones only, never the customer's art */
+  --halftone-dot: #2a271e;
+  --halftone-size: 7px;
+
+  /* Geometry — hard squares + fat outlines */
+  --bw: 3px;
+  --bw-2: 2.5px;
+  --r-0: 0px;
+  --r-sm: 2px;
+
+  /* The collapse-shadow — hard offset, no blur, pure ink */
+  --off: 4px;
+  --off-sm: 3px;
+  --off-lg: 6px;
+  --shadow: var(--off) var(--off) 0 var(--ink);
+  --shadow-sm: var(--off-sm) var(--off-sm) 0 var(--ink);
+  --shadow-lg: var(--off-lg) var(--off-lg) 0 var(--ink);
+
+  /* Type */
+  --font-display: 'Archivo Black', 'Archivo', system-ui, sans-serif;
+  --font-heavy: 'Archivo', 'Space Grotesk', sans-serif;
+  --font-body: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 
 html,
 body {
-  font-family: 'Inter', system-ui, sans-serif;
-  background: var(--surface);
+  font-family: var(--font-body);
+  background: var(--paper);
   color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* The halftone fill utility — applied to dark zones (shirt canvas, AI panel,
+   modal scrims). Never the customer's artwork. */
+.shirtify-halftone {
+  background-color: var(--ink);
+  background-image: radial-gradient(var(--halftone-dot) 1.3px, transparent 1.4px);
+  background-size: var(--halftone-size) var(--halftone-size);
+}
+
+::selection {
+  background: var(--lime);
+  color: var(--lime-ink);
+}
+
+/* AppSlider thumb — pseudo-elements can't be expressed in Tailwind, so the
+   chunky square lime thumb lives here. The track is styled on the element. */
+.shirtify-rng {
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+}
+.shirtify-rng::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: -1px;
+  background: var(--lime);
+  border: var(--bw-2) solid var(--ink);
+  cursor: pointer;
+}
+.shirtify-rng::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: var(--lime);
+  border: var(--bw-2) solid var(--ink);
+  cursor: pointer;
+  border-radius: 0;
+}
+
+/* AppSkeleton — a single hard sweep, no spinner. */
+.shirtify-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(22, 20, 15, 0.06), transparent);
+  animation: shirtify-sweep 1.2s infinite;
+}
+@keyframes shirtify-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }

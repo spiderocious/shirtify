@@ -12,10 +12,15 @@
     "lint": "eslint --config ../../eslint.config.mjs 'src/**/*.{ts,tsx}'"
   },
   "dependencies": {
+    "@fontsource/archivo": "^5.2.8",
+    "@fontsource/archivo-black": "^5.2.8",
+    "@fontsource/jetbrains-mono": "^5.2.8",
+    "@fontsource/space-grotesk": "^5.2.10",
     "@repo/api": "workspace:*",
     "@repo/core": "workspace:*",
     "@repo/ui": "workspace:*",
     "@tanstack/react-query": "^5.62.0",
+    "meemaw": "^1.0.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^6.28.0"

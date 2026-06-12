@@ -9,35 +9,38 @@ export function HomeScreen() {
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-16">
-      <AppText variant="caption">web app</AppText>
-      <AppText variant="display-1" className="mt-2 text-brand-900">
-        Monorepo template
+      <AppText variant="overline">Shirtify</AppText>
+      <AppText variant="display-1" className="mt-2">
+        Design your shirt. Send it back.
       </AppText>
-      <AppText variant="body" className="mt-4 max-w-2xl text-ink-700">
-        A starting point: Nx + pnpm workspace with shared <code>core</code>,{' '}
-        <code>api</code> and <code>ui</code> packages, an Express backend and three
-        frontends. Replace this copy and build your product.
+      <AppText variant="body" className="mt-4 max-w-2xl">
+        A per-customer t-shirt design link. The customer designs in the browser; she gets a
+        print-ready file. Built on the <code>@repo/ui</code> neobrutalist-pop library.
       </AppText>
 
       <div className="mt-8 flex gap-3">
-        <Link to={ROUTES.EXAMPLE}>
-          <AppButton>Open example</AppButton>
+        <Link to={ROUTES.PREVIEW}>
+          <AppButton variant="primary">Open the component library ›</AppButton>
         </Link>
-        <AppButton variant="secondary" type="button">
-          Sign in
-        </AppButton>
+        <Link to={ROUTES.EXAMPLE}>
+          <AppButton variant="secondary" type="button">
+            Example screen
+          </AppButton>
+        </Link>
       </div>
 
-      <section className="mt-12 rounded-lg border border-brand-900/10 bg-white/60 p-4 text-sm">
-        <AppText variant="caption">backend health</AppText>
-        <div className="mt-2">
-          {isLoading && 'Checking…'}
-          {isError && <span className="text-accent-600">unreachable — is main-backend running?</span>}
-          {data && (
+      <section className="mt-12 border-3 border-ink bg-paper-warm p-4 text-sm shadow-pop-sm">
+        <AppText variant="overline">backend health</AppText>
+        <div className="mt-2 font-mono text-sm">
+          {isLoading ? 'Checking…' : null}
+          {isError ? (
+            <span className="text-tomato">unreachable — is main-backend running?</span>
+          ) : null}
+          {data ? (
             <span>
               status: <strong>{data.status}</strong>
             </span>
-          )}
+          ) : null}
         </div>
       </section>
     </main>

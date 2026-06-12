@@ -16,6 +16,9 @@ export const ROUTES = {
   EXAMPLE: '/example',
   EXAMPLE_ITEM: (id: string) => `/example/${id}`,
 
+  // Design-system preview (the @repo/ui viewer)
+  PREVIEW: '/preview',
+
   // Admin
   ADMIN_LOGIN: '/admin/login',
   ADMIN_HOME: '/admin',
