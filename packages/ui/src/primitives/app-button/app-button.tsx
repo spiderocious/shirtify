@@ -1,50 +1,95 @@
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
 
-import { cn } from '../../utils/cn.js';
+import { cn } from '../../utils/cn.ts';
 
-export type AppButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
+/**
+ * Shirtify button — stance #28 Neobrutalist pop.
+ * Visual spec: design-system/projects/shirtify/preview/10-buttons.html
+ * Tokens:      design-system/projects/shirtify/preview/_foundation.css (.b, :207-)
+ *
+ * The signature interaction: a fat-outlined button on a hard offset shadow that
+ * COLLAPSES on press — it translates by its shadow's offset so it lands flat.
+ * Five jobs: primary (lime/GO), ai (blue/magic), secondary, ghost, danger
+ * (ghost crimson, the one irreversible action — fills on hover).
+ */
+export type AppButtonVariant = 'primary' | 'ai' | 'secondary' | 'ghost' | 'danger';
+export type AppButtonSize = 'sm' | 'md' | 'lg';
 
 export interface AppButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: AppButtonVariant;
+  size?: AppButtonSize;
   loading?: boolean;
+  block?: boolean;
+  iconOnly?: boolean;
   leadingIcon?: ReactNode;
   trailingIcon?: ReactNode;
 }
 
-// Tokens mirror packages/ui/src/theme/index.ts (brand / accent). Kept as
-// classes here so the primitive stays usable without a Tailwind theme merge.
-const VARIANT_CLASSES: Record<AppButtonVariant, string> = {
+const BASE =
+  'inline-flex items-center justify-center gap-2 border-3 border-ink font-heavy font-extrabold ' +
+  'transition-[transform,box-shadow,background-color] duration-[60ms] ease-out ' +
+  'focus:outline-none focus-visible:ring-4 focus-visible:ring-blue/30 ' +
+  'disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0 ' +
+  '[-webkit-tap-highlight-color:transparent]';
+
+// Each variant carries its rest + press state. The press translates the button
+// onto its own shadow (shadow → 0). Danger uses a crimson shadow + ghost fill.
+const VARIANT: Record<AppButtonVariant, string> = {
   primary:
-    'bg-[#1e3a8a] text-white hover:bg-[#1d4ed8] focus-visible:ring-[#1d4ed8] disabled:opacity-60',
+    'bg-lime text-lime-ink shadow-pop hover:bg-lime-deep active:translate-x-1 active:translate-y-1 active:shadow-none',
+  ai: 'bg-blue text-white shadow-pop hover:bg-blue-deep active:translate-x-1 active:translate-y-1 active:shadow-none',
   secondary:
-    'bg-[#f1f5f9] text-[#1e3a8a] hover:bg-[#e2e8f0] focus-visible:ring-[#1e3a8a] disabled:opacity-60',
-  ghost:
-    'bg-transparent text-[#1e3a8a] hover:bg-[#1e3a8a]/5 focus-visible:ring-[#1e3a8a] disabled:opacity-60',
+    'bg-paper-warm text-ink shadow-pop hover:bg-paper-deep active:translate-x-1 active:translate-y-1 active:shadow-none',
+  ghost: 'border-ink bg-transparent text-ink shadow-none active:translate-y-px',
   danger:
-    'bg-[#ea580c] text-white hover:bg-[#c2410c] focus-visible:ring-[#ea580c] disabled:opacity-60',
+    'border-crit bg-transparent text-crit shadow-pop-crit hover:bg-crit hover:text-white active:translate-x-[3px] active:translate-y-[3px] active:shadow-none',
+};
+
+const SIZE: Record<AppButtonSize, string> = {
+  sm: 'px-[11px] py-[7px] text-xs shadow-pop-sm active:translate-x-[3px] active:translate-y-[3px]',
+  md: 'px-4 py-[11px] text-sm',
+  lg: 'px-[22px] py-[14px] text-base shadow-pop-lg active:translate-x-1.5 active:translate-y-1.5',
+};
+
+const ICON_ONLY: Record<AppButtonSize, string> = {
+  sm: 'h-9 w-9 p-0',
+  md: 'h-11 w-11 p-0',
+  lg: 'h-[52px] w-[52px] p-0',
 };
 
 export const AppButton = forwardRef<HTMLButtonElement, AppButtonProps>(function AppButton(
-  { variant = 'primary', className, loading, leadingIcon, trailingIcon, children, disabled, ...rest },
+  {
+    variant = 'primary',
+    size = 'md',
+    loading = false,
+    block = false,
+    iconOnly = false,
+    leadingIcon,
+    trailingIcon,
+    className,
+    children,
+    disabled,
+    ...rest
+  },
   ref,
 ) {
   return (
     <button
       ref={ref}
-      disabled={disabled || loading}
+      disabled={disabled === true || loading}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-md px-4 py-2',
-        'text-sm font-medium transition-colors',
-        'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
-        'disabled:cursor-not-allowed',
-        VARIANT_CLASSES[variant],
+        BASE,
+        VARIANT[variant],
+        SIZE[size],
+        iconOnly && ICON_ONLY[size],
+        block && 'w-full',
         className,
       )}
       {...rest}
     >
-      {leadingIcon ? <span className="-ml-0.5">{leadingIcon}</span> : null}
-      <span>{loading ? 'Loading…' : children}</span>
-      {trailingIcon ? <span className="-mr-0.5">{trailingIcon}</span> : null}
+      {leadingIcon ? <span className="-ml-0.5 inline-flex">{leadingIcon}</span> : null}
+      {iconOnly ? children : <span>{loading ? 'Loading…' : children}</span>}
+      {trailingIcon ? <span className="-mr-0.5 inline-flex">{trailingIcon}</span> : null}
     </button>
   );
 });
