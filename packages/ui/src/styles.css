@@ -1,0 +1,18 @@
+/* Optional shared base styles. Apps can import this from `@repo/ui/styles.css`
+   on top of their own Tailwind layer. Mirror the tokens in
+   packages/ui/src/theme/index.ts when re-theming. */
+
+:root {
+  --brand: #1e3a8a;
+  --brand-strong: #1d4ed8;
+  --surface: #f8fafc;
+  --accent: #ea580c;
+  --ink: #0f172a;
+}
+
+html,
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--surface);
+  color: var(--ink);
+}

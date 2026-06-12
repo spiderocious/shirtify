@@ -1,0 +1,27 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "exactOptionalPropertyTypes": false,
+    "paths": {
+      "@app/*": ["./src/*"],
+      "@features/*": ["./src/features/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@repo/ui": ["../../packages/ui/src/index.ts"],
+      "@repo/ui/*": ["../../packages/ui/src/*"],
+      "@repo/core": ["../../packages/core/src/index.ts"],
+      "@repo/core/*": ["../../packages/core/src/*"],
+      "@repo/api": ["../../packages/api/src/index.ts"],
+      "@repo/api/*": ["../../packages/api/src/*"],
+      "@icons": ["../../packages/ui/src/icons/index.ts"]
+    }
+  },
+  "include": ["src"]
+}
