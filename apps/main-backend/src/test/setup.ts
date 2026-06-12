@@ -1,6 +1,6 @@
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
-import { afterAll, afterEach, beforeAll } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach } from 'vitest';
 
 // Env must be set BEFORE any module that imports `env.ts` is loaded.
 process.env.NODE_ENV = 'test';
@@ -21,6 +21,16 @@ afterEach(async () => {
   // Truncate between tests — never drop/recreate the container (hard-lessons).
   const { collections } = mongoose.connection;
   await Promise.all(Object.values(collections).map((c) => c.deleteMany({})));
+  // Reset the in-memory rate-limit buckets so login tests don't bleed counts.
+  const { __resetRateLimit } = await import('../middlewares/rateLimit.middleware.js');
+  __resetRateLimit();
+});
+
+beforeEach(async () => {
+  // Platform colours are reference data every test relies on; reseed after the
+  // afterEach truncation so each test starts with the catalogue present.
+  const { seedPlatformColors } = await import('../db/seed-colors.js');
+  await seedPlatformColors();
 });
 
 afterAll(async () => {

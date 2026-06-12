@@ -7,6 +7,18 @@ import { logger } from '@lib/logger.js';
 import { ResponseUtil } from '@lib/response.js';
 import { HTTP_STATUS } from '@shared/constants/http-status.js';
 
+interface BodyParserError {
+  type: string;
+  status?: number;
+}
+
+/** body-parser/express.json errors carry a string `type` and a `body` field. */
+const isBodyParserError = (err: unknown): err is BodyParserError =>
+  err instanceof SyntaxError &&
+  'type' in err &&
+  typeof (err as { type: unknown }).type === 'string' &&
+  (err as { type: string }).type.startsWith('entity.');
+
 const formatZodFieldErrors = (err: ZodError): Record<string, string[]> => {
   const out: Record<string, string[]> = {};
   for (const issue of err.issues) {
@@ -45,6 +57,24 @@ export const errorHandler = (
       code: 'validation_error',
       message: 'Validation failed',
       field_errors: formatZodFieldErrors(err),
+    });
+    return;
+  }
+
+  // body-parser (express.json) errors are client faults, not 500s:
+  //  - malformed JSON → SyntaxError with type 'entity.parse.failed'
+  //  - oversized body  → type 'entity.too.large' (status 413)
+  if (isBodyParserError(err)) {
+    if (err.type === 'entity.too.large') {
+      ResponseUtil.error(res, HTTP_STATUS.UNPROCESSABLE_ENTITY, {
+        code: 'validation_error',
+        message: 'Request body is too large',
+      });
+      return;
+    }
+    ResponseUtil.error(res, HTTP_STATUS.BAD_REQUEST, {
+      code: 'validation_error',
+      message: 'Malformed request body',
     });
     return;
   }

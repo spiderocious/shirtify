@@ -38,7 +38,10 @@ export {
   DesignSchema,
   AssetSchema,
   AssetKind,
+  ColorSchema,
+  ColorScope,
 } from './schemas/domain.js';
+export type { Color } from './schemas/domain.js';
 
 // API wire schemas
 export * from './schemas/api.js';

@@ -3,11 +3,11 @@ import {
   emptyScene,
   generateToken,
   SHIRT_TYPES,
-  SHIRT_COLORS,
   type PublicBrand,
   type ShirtType,
 } from '@shirtify/core';
 
+import { assertColorAvailable } from '@features/colors/colors.service.js';
 import { NotFoundError } from '@lib/errors.js';
 import { getRepos } from '@repos/index.js';
 import type { SellerRecord } from '@repos/ports.js';
@@ -28,10 +28,12 @@ export const getStorefront = async (
   const seller = await repos.sellers.bySlug(slug);
   if (!seller) throw new NotFoundError('Storefront');
 
+  // Resolve THIS seller's available colours (platform ∪ her own), not a global list.
+  const colors = await repos.colors.listForSeller(seller.id);
   return {
     brand: toPublicBrand(seller),
     shirt_types: [...SHIRT_TYPES],
-    shirt_colors: SHIRT_COLORS.map((c) => c.id),
+    shirt_colors: colors.map((c) => c.slug),
   };
 };
 
@@ -53,6 +55,8 @@ export const startPublicSession = async (
   const repos = getRepos();
   const seller = await repos.sellers.bySlug(slug);
   if (!seller) throw new NotFoundError('Storefront');
+
+  await assertColorAvailable(seller.id, input.shirt_color);
 
   const token = await uniqueToken();
   const session = await repos.sessions.create({

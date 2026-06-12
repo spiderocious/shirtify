@@ -160,3 +160,19 @@ export const PushSubscriptionBody = z.object({
   keys: z.object({ p256dh: z.string(), auth: z.string() }),
 });
 export type PushSubscriptionBody = z.infer<typeof PushSubscriptionBody>;
+
+// ---- Colours (seller-managed) ----
+export const CreateColorBody = z.object({
+  label: z.string().min(1).max(40),
+  hex: z
+    .string()
+    .regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, 'must be a hex colour like #1a2b3c'),
+  /** Optional explicit slug; derived from label if omitted. */
+  slug: z
+    .string()
+    .regex(/^[a-z0-9-]+$/, 'lowercase letters, digits, hyphens only')
+    .min(1)
+    .max(40)
+    .optional(),
+});
+export type CreateColorBody = z.infer<typeof CreateColorBody>;
