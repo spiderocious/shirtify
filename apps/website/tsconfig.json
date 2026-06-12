@@ -17,10 +17,10 @@
     "paths": {
       "@app/*": ["./src/app/*"],
       "@components/*": ["./src/components/*"],
-      "@repo/ui": ["../../packages/ui/src/index.ts"],
-      "@repo/ui/*": ["../../packages/ui/src/*"],
-      "@repo/core": ["../../packages/core/src/index.ts"],
-      "@repo/core/*": ["../../packages/core/src/*"],
+      "@shirtify/ui": ["../../packages/ui/src/index.ts"],
+      "@shirtify/ui/*": ["../../packages/ui/src/*"],
+      "@shirtify/core": ["../../packages/core/src/index.ts"],
+      "@shirtify/core/*": ["../../packages/core/src/*"],
       "@icons": ["../../packages/ui/src/icons/index.ts"]
     }
   },

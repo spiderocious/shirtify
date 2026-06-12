@@ -1,5 +1,5 @@
 {
-  "name": "@repo/website",
+  "name": "@shirtify/website",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,8 +10,8 @@
     "lint": "eslint --config ../../eslint.config.mjs 'src/**/*.{ts,tsx}'"
   },
   "dependencies": {
-    "@repo/core": "workspace:*",
-    "@repo/ui": "workspace:*",
+    "@shirtify/core": "workspace:*",
+    "@shirtify/ui": "workspace:*",
     "next": "^15.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

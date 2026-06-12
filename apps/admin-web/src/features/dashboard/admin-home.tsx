@@ -1,5 +1,5 @@
-import { useHealth } from '@repo/api';
-import { AppText } from '@repo/ui';
+import { useHealth } from '@shirtify/api';
+import { AppText } from '@shirtify/ui';
 
 export function AdminHome() {
   const { data, isLoading, isError } = useHealth();

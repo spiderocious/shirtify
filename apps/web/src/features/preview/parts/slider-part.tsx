@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { AppSlider, AppText } from '@repo/ui';
+import { AppSlider, AppText } from '@shirtify/ui';
 
 import { Section, ComponentRow } from './preview-canvas.tsx';
 

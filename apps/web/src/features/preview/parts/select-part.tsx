@@ -1,4 +1,4 @@
-import { AppField, AppSelect } from '@repo/ui';
+import { AppField, AppSelect } from '@shirtify/ui';
 
 import { Section, ComponentRow } from './preview-canvas.tsx';
 

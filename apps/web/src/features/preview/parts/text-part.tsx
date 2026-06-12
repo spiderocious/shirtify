@@ -1,4 +1,4 @@
-import { AppText } from '@repo/ui';
+import { AppText } from '@shirtify/ui';
 
 import { Section, ComponentRow } from './preview-canvas.tsx';
 

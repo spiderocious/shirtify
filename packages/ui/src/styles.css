@@ -1,7 +1,7 @@
 /* Shirtify shared base styles + design tokens.
    Stance: #28 Neobrutalist pop. Mirrors
    design-system/projects/shirtify/preview/_foundation.css.
-   Apps import this via `@repo/ui/styles.css` on top of their Tailwind layer.
+   Apps import this via `@shirtify/ui/styles.css` on top of their Tailwind layer.
 
    Fonts are self-hosted via @fontsource (imported in each app's main.tsx):
    @fontsource/archivo-black, @fontsource/archivo, @fontsource/space-grotesk,

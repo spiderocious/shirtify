@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { AppText } from '@repo/ui';
+import { AppText } from '@shirtify/ui';
 
 export default function HomePage() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:5173';

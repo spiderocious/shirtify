@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { AppToggle } from '@repo/ui';
+import { AppToggle } from '@shirtify/ui';
 
 import { Section, ComponentRow } from './preview-canvas.tsx';
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { AppColourSwatches, AppFontPicker, type AppFontOption } from '@repo/ui';
+import { AppColourSwatches, AppFontPicker, type AppFontOption } from '@shirtify/ui';
 
 import { Section, ComponentRow } from './preview-canvas.tsx';
 

@@ -1,4 +1,4 @@
-import { AppAvatar, AppButton, AppChip, AppPill, AppTable, type AppTableColumn } from '@repo/ui';
+import { AppAvatar, AppButton, AppChip, AppPill, AppTable, type AppTableColumn } from '@shirtify/ui';
 
 import { Section, ComponentRow } from './preview-canvas.tsx';
 

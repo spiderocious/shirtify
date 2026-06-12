@@ -6,21 +6,24 @@ export const ROUTES = {
   PRICING: '/pricing',
   ABOUT: '/about',
 
-  // Auth
+  // Seller auth
   LOGIN: '/login',
   REGISTER: '/register',
   FORGOT_PASSWORD: '/forgot-password',
 
-  // App
+  // Seller dashboard (admin-web)
   DASHBOARD: '/dashboard',
-  EXAMPLE: '/example',
-  EXAMPLE_ITEM: (id: string) => `/example/${id}`,
+  SESSION_DETAIL: (id: string) => `/dashboard/sessions/${id}`,
+  BRAND: '/dashboard/brand',
 
-  // Design-system preview (the @repo/ui viewer)
+  // Customer-facing (web)
+  CUSTOMER_DESIGN: (token: string) => `/c/${token}`,
+  STOREFRONT: (slug: string) => `/s/${slug}`,
+
+  // Design-system preview (the @shirtify/ui viewer)
   PREVIEW: '/preview',
 
-  // Admin
+  // Admin dashboard home (current scaffold entry — reworked in Phase 2)
   ADMIN_LOGIN: '/admin/login',
   ADMIN_HOME: '/admin',
-  ADMIN_USERS: '/admin/users',
 } as const;

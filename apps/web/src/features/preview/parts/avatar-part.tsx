@@ -1,4 +1,4 @@
-import { AppAvatar } from '@repo/ui';
+import { AppAvatar } from '@shirtify/ui';
 
 import { Section, ComponentRow } from './preview-canvas.tsx';
 

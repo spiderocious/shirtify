@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { AppToolBar, type AppTool } from '@repo/ui';
+import { AppToolBar, type AppTool } from '@shirtify/ui';
 
 import { Section, ComponentRow } from './preview-canvas.tsx';
 

@@ -1,4 +1,4 @@
-import { AppBox, AppCard, AppPill, AppText } from '@repo/ui';
+import { AppBox, AppCard, AppPill, AppText } from '@shirtify/ui';
 
 import { Section, ComponentRow } from './preview-canvas.tsx';
 

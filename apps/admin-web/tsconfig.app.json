@@ -14,12 +14,12 @@
       "@app/*": ["./src/*"],
       "@features/*": ["./src/features/*"],
       "@shared/*": ["./src/shared/*"],
-      "@repo/ui": ["../../packages/ui/src/index.ts"],
-      "@repo/ui/*": ["../../packages/ui/src/*"],
-      "@repo/core": ["../../packages/core/src/index.ts"],
-      "@repo/core/*": ["../../packages/core/src/*"],
-      "@repo/api": ["../../packages/api/src/index.ts"],
-      "@repo/api/*": ["../../packages/api/src/*"],
+      "@shirtify/ui": ["../../packages/ui/src/index.ts"],
+      "@shirtify/ui/*": ["../../packages/ui/src/*"],
+      "@shirtify/core": ["../../packages/core/src/index.ts"],
+      "@shirtify/core/*": ["../../packages/core/src/*"],
+      "@shirtify/api": ["../../packages/api/src/index.ts"],
+      "@shirtify/api/*": ["../../packages/api/src/*"],
       "@icons": ["../../packages/ui/src/icons/index.ts"]
     }
   },

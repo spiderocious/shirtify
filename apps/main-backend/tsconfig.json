@@ -12,9 +12,11 @@
       "@features/*": ["features/*"],
       "@lib/*": ["lib/*"],
       "@middlewares/*": ["middlewares/*"],
-      "@shared/*": ["shared/*"]
+      "@shared/*": ["shared/*"],
+      "@db/*": ["db/*"],
+      "@repos/*": ["repos/*"]
     }
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist", "src/**/*.test.ts", "src/test/**"]
 }

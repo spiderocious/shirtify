@@ -1,20 +1,32 @@
-// Shared domain types live here. These are placeholders for a fresh project —
-// replace them with your own entities. Kept minimal so nothing carries over
-// from the template.
+// Domain types are inferred from the Zod schemas (single source of truth).
+// Re-exported here so consumers can `import type { Session } from '@shirtify/core'`.
 
-export type UserRole = 'user' | 'admin';
+export type {
+  Seller,
+  SellerRole,
+  BrandColors,
+  PublicBrand,
+  Session,
+  SessionKind,
+  SessionStatus,
+  PublicSession,
+  Design,
+  Asset,
+  AssetKind,
+} from '../schemas/domain.js';
 
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: UserRole;
-}
+export type {
+  Scene,
+  SceneSide,
+  Layer,
+  TextLayer,
+  ImageLayer,
+  ShirtType,
+} from '../schemas/scene.js';
 
-// Example entity used by the `example` feature wiring (web + backend).
-// Delete once you have real domain types.
-export interface ExampleItem {
-  id: string;
-  title: string;
-  createdAt: string; // ISO 8601
+/** Cursor-paginated result shape, shared across list endpoints. */
+export interface PaginatedResult<T> {
+  items: T[];
+  nextCursor: string | null;
+  hasMore: boolean;
 }

@@ -1,4 +1,4 @@
-// @repo/ui — Shirtify component library. Stance #28 Neobrutalist pop.
+// @shirtify/ui — Shirtify component library. Stance #28 Neobrutalist pop.
 // Visual spec: design-system/projects/shirtify/preview/
 
 // Theme
@@ -68,6 +68,11 @@ export type {
   CriticalOptions,
   ModalPosition,
 } from './drawer/index.ts';
+
+// Control-flow utilities (meemaw `Show`/`Repeat`) live in the client-only
+// subpath `@shirtify/ui/flow` — NOT this barrel, which the Next.js website
+// imports into Server Components. Keeping them out avoids forcing `'use client'`
+// onto the whole library. In SPA feature code:  import { Show } from '@shirtify/ui/flow';
 
 // Icons are NOT re-exported here. Import them via the dedicated proxy:
 //   import { IconHome } from '@icons';

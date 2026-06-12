@@ -1,4 +1,4 @@
-import { BannerHost, ModalHost, ToastHost } from '@repo/ui';
+import { BannerHost, ModalHost, ToastHost } from '@shirtify/ui';
 
 import { AppProviders } from './app.provider.tsx';
 import { AppRoutes } from './app.routes.tsx';

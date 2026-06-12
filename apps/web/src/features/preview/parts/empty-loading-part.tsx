@@ -1,4 +1,4 @@
-import { AppButton, AppEmptyState, AppSkeleton } from '@repo/ui';
+import { AppButton, AppEmptyState, AppSkeleton } from '@shirtify/ui';
 
 import { Section, ComponentRow } from './preview-canvas.tsx';
 

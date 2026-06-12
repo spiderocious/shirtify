@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 
-import { useHealth } from '@repo/api';
-import { ROUTES } from '@repo/core';
-import { AppButton, AppText } from '@repo/ui';
+import { useHealth } from '@shirtify/api';
+import { ROUTES } from '@shirtify/core';
+import { AppButton, AppText } from '@shirtify/ui';
 
 export function HomeScreen() {
   const { data, isLoading, isError } = useHealth();
@@ -15,17 +15,12 @@ export function HomeScreen() {
       </AppText>
       <AppText variant="body" className="mt-4 max-w-2xl">
         A per-customer t-shirt design link. The customer designs in the browser; she gets a
-        print-ready file. Built on the <code>@repo/ui</code> neobrutalist-pop library.
+        print-ready file. Built on the <code>@shirtify/ui</code> neobrutalist-pop library.
       </AppText>
 
       <div className="mt-8 flex gap-3">
         <Link to={ROUTES.PREVIEW}>
           <AppButton variant="primary">Open the component library ›</AppButton>
-        </Link>
-        <Link to={ROUTES.EXAMPLE}>
-          <AppButton variant="secondary" type="button">
-            Example screen
-          </AppButton>
         </Link>
       </div>
 

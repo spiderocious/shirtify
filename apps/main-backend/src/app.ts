@@ -4,15 +4,26 @@ import express from 'express';
 import helmet from 'helmet';
 
 import { register as registerAuth } from '@features/auth/index.js';
-import { register as registerExample } from '@features/example/index.js';
 import { register as registerHealth } from '@features/health/index.js';
+import { register as registerNotifications } from '@features/notifications/index.js';
+import { register as registerPublic } from '@features/public/index.js';
+import { register as registerSessions } from '@features/sessions/index.js';
+import { register as registerStorefront } from '@features/storefront/index.js';
 import { errorHandler } from '@middlewares/errorHandler.middleware.js';
 import { requestIdMiddleware } from '@middlewares/requestId.middleware.js';
 import { requestLogMiddleware } from '@middlewares/requestLog.middleware.js';
 
 import { env } from './env.js';
 
-const features = [registerHealth, registerAuth, registerExample];
+// Order matters: specific/auth'd routes before the public token/slug surfaces.
+const features = [
+  registerHealth,
+  registerAuth,
+  registerNotifications,
+  registerSessions,
+  registerStorefront,
+  registerPublic,
+];
 
 export const buildApp = (): express.Express => {
   const app = express();

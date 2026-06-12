@@ -1,7 +1,7 @@
 import type { Express } from 'express';
 
-import exampleRoutes from './example.routes.js';
+import publicRoutes from './public.routes.js';
 
 export const register = (app: Express): void => {
-  app.use('/api/v1/example', exampleRoutes);
+  app.use('/api/v1/c', publicRoutes);
 };

@@ -52,7 +52,7 @@ export function Stage({ children }: { readonly children: ReactNode }) {
 }
 
 // The halftone dark zone (shirt-canvas ground / AI panel) for previews that
-// need it. Matches the .shirtify-halftone utility in @repo/ui/styles.css.
+// need it. Matches the .shirtify-halftone utility in @shirtify/ui/styles.css.
 export function HalftoneStage({ children }: { readonly children: ReactNode }) {
   return (
     <div className="shirtify-halftone flex min-h-[160px] items-center justify-center border-3 border-ink p-6 shadow-pop">

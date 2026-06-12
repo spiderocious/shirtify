@@ -1,4 +1,4 @@
-import { AppChip } from '@repo/ui';
+import { AppChip } from '@shirtify/ui';
 
 import { Section, ComponentRow } from './preview-canvas.tsx';
 

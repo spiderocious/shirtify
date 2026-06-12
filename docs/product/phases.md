@@ -1,13 +1,14 @@
 # Shirtify — Build Phases
 
-The ordered plan. **Each phase is a vertical slice** — backend + frontend
-together — that ends in something you can click through and test end-to-end by
-hand. Phases are sequential; we pause for review after each before the next.
+The ordered plan. **Backend is built once and complete (Phase 1); the frontend
+is built progressively on top of that stable API (Phases 2+).** Phase 0 is the
+foundation/rebrand. Phases are sequential; we pause for review after each.
 
-Why vertical, not layered: a customer link can't exist until a seller can mint
-one, and the canvas can't be reached until a link exists. So auth + session
-creation come **first**, and every phase after stands on a system you can already
-log into and use.
+Why this order: the backend is the contract everything else stands on. Once the
+whole API exists and is contract-tested, each frontend slice is small, isolated,
+and **testable against a real running backend** — no stubbing, no half-built
+endpoints. We're **not touching design** in these phases — frontend slices consume
+the existing `@shirtify/ui` primitives as-is; the design system is out of scope here.
 
 See the full architecture in [shirtify-build-plan.md](./shirtify-build-plan.md).
 Quick recap:
@@ -43,8 +44,7 @@ Quick recap:
 ## Phase 0 — Rebrand + foundation
 
 **Goal:** turn the untouched template into the Shirtify project and stand up the
-shared seams every later phase builds on (schemas, DB adapter, storage client,
-canvas package shell) so nothing downstream is blocked on plumbing.
+shared seams the backend will build on, so Phase 1 starts on clean ground.
 
 **Scope:**
 - Rename package scope `@repo/*` → `@shirtify/*` across all `package.json`,
@@ -54,7 +54,7 @@ canvas package shell) so nothing downstream is blocked on plumbing.
 - Delete placeholders: `example` feature (backend + web), `User` / `ExampleItem`
   stub types, `ROUTES.EXAMPLE*`, `EP.EXAMPLE*`, placeholder home/website copy.
 - `@shirtify/core`: Zod schemas + inferred types for the domain (`Seller`,
-  `Session`, `Design`, `Asset`) and the **`Scene` canvas schema** (§4 of the plan);
+  `Session`, `Design`, `Asset`) and the **`Scene` canvas schema** (plan §4);
   curated fonts / shirt-colour set / shirt-type presets; `ROUTES`.
 - DB: wire **MongoDB + Mongoose** with the Repository **ports** (`SellerRepo`,
   `SessionRepo`, `DesignRepo`, `AssetRepo`) and their Mongo adapter impls; Mongo
@@ -62,9 +62,8 @@ canvas package shell) so nothing downstream is blocked on plumbing.
 - Storage: `FileService` client (R2 presigned-URL flow) in `@shirtify/api`.
 - `packages/canvas` shell: package scaffold + `mount()`/`<DesignCanvas>` API
   signature stub (no editor logic yet) + dependency on the shared `Scene` schema.
-- Add **meemaw** to `@shirtify/ui` re-export.
-- Seed seller #1 (her).
-- `pnpm install` to refresh the lockfile.
+- Add **meemaw** to `@shirtify/ui` re-export. _(Wiring only — no design changes.)_
+- Seed seller #1 (her). `pnpm install` to refresh the lockfile.
 
 **Surfaces:** monorepo wiring, `@shirtify/core`, `@shirtify/api`,
 `packages/canvas` (shell), `main-backend` (DB only).
@@ -78,153 +77,178 @@ canvas package shell) so nothing downstream is blocked on plumbing.
 
 ---
 
-## Phase 1 — Seller logs in and mints a customer link
+## Phase 1 — The entire MVP backend (built once, contract-tested)
 
-**Goal:** the first clickable slice. A seller can log into the dashboard, create a
-customer session, and get a real shareable link. Nothing downstream is reachable
-without this, so it comes first.
+**Goal:** implement **every endpoint the whole MVP needs**, in one phase, behind
+the Repository ports with Zod validation and contract tests. After this, the API
+is complete and stable; all frontend phases build against a real running backend.
 
-**Backend (`main-backend` + `@shirtify/core`):**
-- Build out **auth** from the template stub: `POST /auth/register | login | refresh`,
-  `POST /auth/logout`, `GET /me` — JWT access/refresh, password hashing, auth
-  middleware. Self-serve signup (she = seeded first seller from Phase 0).
-- **Sessions:** `POST /sessions` (generates 8-char base62 token + link),
-  `GET /sessions?cursor=&status=` (cursor-paginated inbox), `GET /sessions/:id`.
-  All `asyncHandler` + `ResponseUtil` + Zod parse, behind the Repository ports.
-- Contract tests at the seam (Zod ↔ shared TS types).
+**Scope — all routes (`asyncHandler` + `ResponseUtil` + Zod + ports, registered in
+order in `app.ts`):**
 
-**Frontend (`apps/admin-web` + `@shirtify/api`):**
-- Auth screens (login / signup), `AuthGuard`, token storage, ky 401-refresh.
-- Dashboard shell + **inbox list** (customer name, shirt type, status, dates).
-- **"New session" form** (customer name, shirt type, shirt colour, allowed colours,
-  price, notes) → on submit, shows the generated `/c/:token` link with a copy button.
-- react-query hooks for auth + sessions.
+- **Auth (seller):** `POST /auth/register | login | refresh`, `POST /auth/logout`,
+  `GET /me`. JWT access/refresh, password hashing, auth middleware. Self-serve
+  signup; she = seeded seller #1.
+- **Sessions (seller, auth):** `POST /sessions` (generate 8-char base62 token +
+  link), `GET /sessions?cursor=&status=` (cursor-paginated inbox),
+  `GET /sessions/:id` (session + design), `PATCH /sessions/:id` (archive).
+- **Public design surface (token = key, no auth):** `GET /c/:token`
+  (session public-safe + design + brand), `PUT /c/:token/design` (debounced
+  autosave of `{ canvas_front, canvas_back }`), `POST /c/:token/assets` (record an
+  R2 `key` + metadata → link to a layer), `POST /c/:token/submit` (→ `submitted`).
+- **Storefront (public):** `GET /s/:slug` (seller public brand + shirt presets),
+  `POST /s/:slug/start` (cold walk-in → create `kind:'public'` session → return
+  token). Same inbox as custom links.
+- **Export (seller, auth):** `POST /sessions/:id/export` (`{ preset } | { w, h, dpi }`)
+  → server-side **Konva replay** via `node-canvas` → transparent PNG → upload to R2
+  → store export `key` on `design.export_keys` → return `{ key, url }`.
+- **Notifications (seller, auth):** web-push subscription endpoint + send on submit;
+  `wa.me` reminder-link helper.
 
-**Done when (you can test by hand):**
-- [ ] Log in as the seeded seller (and sign up a fresh seller) → JWT refresh works,
-      protected routes gated.
-- [ ] Create a session → a real `/c/:token` link appears with a working copy button.
-- [ ] Inbox lists the session (cursor pagination, status filter).
-- [ ] Contract tests green; typecheck + build pass.
+**Cross-cutting:**
+- All bodies/responses validated by the shared `@shirtify/core` Zod schemas.
+- **Contract test per handler** (parse the response through the shared schema; assert
+  no throw) — the most valuable tests at the seam.
+- Integration tests via `mongodb-memory-server`, truncating collections between tests.
+- The export's `node-canvas` font loading + R2 image fetch proven here.
+
+**Surfaces:** `main-backend`, `@shirtify/core`, `@shirtify/api` (types/EP), plus the
+server-side reuse of the `packages/canvas` Scene schema for export.
+
+**Done when (testable as an API — REST client / test suite, no UI):**
+- [ ] Every endpoint above returns the documented shape; auth gates the seller routes;
+      token gates the public routes.
+- [ ] Full happy path works via a REST client: register/login → create session →
+      `GET /c/:token` → autosave → add asset → submit → `GET /sessions/:id` shows
+      submitted → export returns a transparent PNG.
+- [ ] Storefront `POST /s/:slug/start` mints a public session reachable at `/c/:token`.
+- [ ] Contract + integration tests green; typecheck + lint + build pass.
+- [ ] **Backend QA handoff** doc produced (endpoints, RBAC, edge cases, seed users).
 
 ---
 
-## Phase 2 — Customer opens the link and designs with text ← the heart
+## Phase 2 — Frontend: seller auth
 
-**Goal:** the riskiest, most important surface (PRD: "customer experience first").
-Using a link minted in Phase 1, a customer opens it on a phone and designs a shirt
-with text, smoothly. We build the **`packages/canvas`** editor and the `apps/web`
-host around it.
+**Goal:** first frontend slice. A seller can sign up / log in against the real
+backend and land in a (shell) dashboard. _(Uses existing `@shirtify/ui` primitives —
+no design work.)_
 
-**Backend (`main-backend`):**
-- `GET /c/:token` (public — returns `{ session(public-safe), design, brand }`).
-- `PUT /c/:token/design` (debounced **autosave** of `{ canvas_front, canvas_back }`).
-- Both Zod-parsed, behind the Repository ports; `touchActivity` on autosave.
+**Scope (`apps/admin-web` + `@shirtify/api`):**
+- Auth react-query hooks (`useLogin`, `useRegister`, `useMe`) hitting `EP.AUTH_*`.
+- Token storage + ky 401-refresh wired; `AuthProvider` (Context + `useState`).
+- Login + signup screens; `AuthGuard`; logout.
+- Dashboard shell that renders `GET /me` (proves the authed call end-to-end).
 
-**Frontend (`packages/canvas` + `apps/web` + `@shirtify/api`):**
+**Done when (test by hand):**
+- [ ] Sign up a fresh seller and log in as the seeded seller; protected route gated;
+      refresh keeps the session alive; logout clears it.
+- [ ] Typecheck + build pass.
+
+---
+
+## Phase 3 — Frontend: sessions (inbox + mint a link)
+
+**Goal:** the seller creates a customer session and gets a real shareable link.
+
+**Scope (`apps/admin-web` + `@shirtify/api`):**
+- Sessions hooks (`useSessions` cursor list, `useSession`, `useCreateSession`,
+  `useArchiveSession`).
+- **Inbox** (customer name, shirt type, status, dates; status filter; cursor paging).
+- **"New session" form** (customer name, shirt type/colour, allowed colours, price,
+  notes) → on success shows the generated `/c/:token` link + copy button.
+- Session-detail shell (info/notes/status; design render comes in Phase 5).
+
+**Done when (test by hand):**
+- [ ] Create a session → a real `/c/:token` link appears with a working copy button.
+- [ ] Inbox lists it; status filter + pagination work; archive works.
+- [ ] Typecheck + build pass.
+
+---
+
+## Phase 4 — Frontend: customer canvas (text) ← the heart
+
+**Goal:** the most important surface. Using a link from Phase 3, a customer opens it
+on a phone and designs a shirt with **text**, smoothly, and it autosaves.
+
+**Scope (`packages/canvas` + `apps/web` + `@shirtify/api`):**
 - `packages/canvas` editing surface: Konva stage, shirt mockup (front), **text tool**
-  (12 print-safe fonts, colour, stroke toggle + colour + width, shadow),
-  drag / scale / rotate via Konva `Transformer`, layer panel (select + z-order
-  reorder), **front/back** toggle, **colour tool** (change base shirt colour when the
-  seller allowed options). Implements the `mount()` / `<DesignCanvas>` contract;
-  **zero app knowledge** (no router/auth/EP).
-- Touch-first: pinch-to-scale, touch-drag, rotate handle; right rail collapses on
-  mobile; bottom action bar (Text · Image(disabled) · AI(disabled) · Colour · Done).
-- `apps/web` host: `/c/:token` route + screen, loads the session, supplies
-  `resolveAssetUrl` (R2 view URI) + `onChange` → debounced autosave; chrome (top bar
-  "Designing for {name}", intro in seller voice).
+  (12 fonts, colour, stroke toggle + colour + width, shadow), drag/scale/rotate via
+  Konva `Transformer`, layer panel (select + z-order), **front/back** toggle,
+  **colour tool** (base shirt colour when allowed). Implements the
+  `mount()`/`<DesignCanvas>` contract; **zero app knowledge** (no router/auth/EP).
+- Touch-first: pinch-scale, touch-drag, rotate handle; right rail collapses on mobile;
+  bottom action bar (Text · Image(disabled) · AI(disabled) · Colour · Done).
+- `apps/web` host: `/c/:token` route + screen, loads the session via `GET /c/:token`,
+  supplies `resolveAssetUrl` (R2 view URI) + `onChange` → debounced `PUT .../design`.
 - **Mobile validation** on a real phone viewport early (PRD build note #3).
 
-**Done when (you can test by hand):**
-- [ ] Take the link from Phase 1 → open on a phone → build a multi-layer **text**
-      design; drag/scale/rotate feel good with touch; front/back works.
+**Done when (test by hand):**
+- [ ] Open a Phase-3 link on a phone → build a multi-layer **text** design;
+      drag/scale/rotate feel good with touch; front/back works.
 - [ ] Edits **autosave**; reloading `/c/:token` restores the design.
 - [ ] The canvas module has **zero** app imports — verified.
 - [ ] Typecheck + build pass.
 
 ---
 
-## Phase 3 — Customer adds images and submits; seller sees it
+## Phase 5 — Frontend: image upload + submit (+ seller sees it)
 
-**Goal:** close the customer round-trip. The customer uploads an image and submits;
-the submission shows as "Submitted" in the seller's inbox with the final design.
+**Goal:** close the customer round-trip and show the result on the seller side.
 
-**Backend (`main-backend`):**
-- `POST /c/:token/assets` (records the R2 `key` + metadata → links to a layer).
-- `POST /c/:token/submit` (→ status `submitted`, stamps `submitted_at`).
-- `GET /sessions/:id` returns the submitted design so the dashboard can render it.
-- Contract tests at the seam.
-
-**Frontend (`apps/web` + `apps/admin-web`):**
+**Scope (`apps/web` + `apps/admin-web`):**
 - **Image upload tool** (web) via the R2 flow: `GET /get-upload-uri` → `PUT` file
   straight to storage → `POST /c/:token/assets` with the `key` → image layer
   (PNG/JPG/SVG, ≤5MB), same drag/scale/rotate controls.
 - **Submit flow** (web): "Done — send to {seller}" → `POST /c/:token/submit` →
   confirmation screen, thank-you in seller voice.
-- **Session detail** (admin-web): renders the **submitted** design (a read-only
-  static render — not a live in-progress preview), status badge, archive action.
+- **Session detail** (admin-web): renders the **submitted** design as a read-only
+  static render (not a live in-progress preview); status badge.
 
-**Done when (you can test by hand):**
-- [ ] Design → upload an image (only the `key` is stored backend-side) → submit.
-- [ ] Seller opens the session → status is "Submitted" and the final design shows.
+**Done when (test by hand):**
+- [ ] Design → upload an image → submit → confirmation shows.
+- [ ] Seller opens the session → status "Submitted" + the final design renders.
 - [ ] Full loop works: mint link → design → submit → seller sees it.
-- [ ] Contract tests green; typecheck + build pass.
-
-> **Natural pause point:** Phases 0–3 deliver the complete core loop — seller mints
-> a link, customer designs (text + image) and submits, seller sees the result.
-> Worth feeling on real hardware before export and storefront.
-
----
-
-## Phase 4 — Seller downloads the print file
-
-**Goal:** the seller's payoff — a usable file out of a submitted design.
-
-**Backend (`main-backend` + exporter):**
-- `POST /sessions/:id/export` with `{ preset }` or `{ w, h, dpi }`. Presets (initial):
-  `Web 1024²`, `2400×3200`, `US shirt 4500×5400 @300`, `A4 @300`, `A3 @300`, `Custom`.
-- Server-side **Konva replay** via `node-canvas`: load the Scene → render layers
-  (curated fonts; images via R2 view URI) at target px → transparent PNG → upload to
-  R2 → store the export `key` on `design.export_keys` → return `{ key, url }`.
-
-**Frontend (`apps/admin-web` + `@shirtify/api`):**
-- Export **size picker** (presets + custom w×h/DPI) + **download button** on session
-  detail; optional client-side low-res preview download via `handle.toPNG`.
-
-**Done when (you can test by hand):**
-- [ ] On a submitted session, pick a preset or custom size → download a correct-size
-      **transparent PNG** that matches the on-screen design.
-- [ ] Export key persisted; re-download serves a fresh view URL.
 - [ ] Typecheck + build pass.
 
 ---
 
-## Phase 5 — Public storefront ("second in") + gift/brand layer
+## Phase 6 — Frontend: export / download
 
-**Goal:** open the front door (cold customers walk in without a personal link) and
-add the brand polish + nudges that make it a product and a gift.
+**Goal:** the seller's payoff — a usable file out of a submitted design.
 
-**Backend (`main-backend`):**
-- **Storefront:** `GET /s/:slug` (seller public brand + shirt presets),
-  `POST /s/:slug/start` (cold walk-in → creates `kind:'public'` session → returns
-  token → drops into the same `/c/:token` canvas). One inbox for both ins.
-- Brand fields on the seller (name, logo key, colours, voice); `wa.me` reminder link
-  helper; **web push** "design submitted" subscription + send on submit.
+**Scope (`apps/admin-web` + `@shirtify/api`):**
+- Export **size picker** (presets + custom w×h/DPI) + **download button** on session
+  detail, calling `POST /sessions/:id/export`; optional client-side low-res preview
+  via `handle.toPNG`.
 
-**Frontend (`apps/web` + `apps/admin-web` + `apps/website`):**
-- **Storefront landing** (web): `/s/:slug` → pick shirt type/colour → design → submit
-  (reuses the Phase 2/3 canvas + submit flow).
+**Done when (test by hand):**
+- [ ] On a submitted session, pick a preset or custom size → download a correct-size
+      **transparent PNG** that matches the on-screen design.
+- [ ] Re-download serves a fresh view URL.
+- [ ] Typecheck + build pass.
+
+---
+
+## Phase 7 — Frontend: storefront + gift/brand layer
+
+**Goal:** open the front door (cold customers, no personal link) and thread the
+seller's brand through the customer-facing surfaces.
+
+**Scope (`apps/web` + `apps/admin-web` + `apps/website`):**
+- **Storefront landing** (web): `/s/:slug` → pick shirt type/colour →
+  `POST /s/:slug/start` → drop into the same `/c/:token` canvas + submit flow.
 - **Gift / brand layer:** business name, logo, colours, welcome voice thread through
   dashboard + customer pages + storefront; footer "Designed for {brand}";
-  **logo/wordmark generation** for sellers without one (PRD §8).
+  logo/wordmark for sellers without one (PRD §8). _(Brand values/assets, not a design-
+  system rebuild.)_
 - **Brand settings** + **WhatsApp reminder** button (admin-web); push opt-in.
 - Marketing site (`apps/website`).
 
-**Done when (you can test by hand):**
-- [ ] Visit `/s/:slug` cold (no link from the seller) → design → submit → lands in
-      the same inbox as custom-link submissions.
-- [ ] Seller's brand renders across all customer-facing surfaces.
-- [ ] Reminder link generates correctly; push fires on submit.
+**Done when (test by hand):**
+- [ ] Visit `/s/:slug` cold → design → submit → lands in the same inbox as custom
+      links.
+- [ ] Brand renders across customer-facing surfaces; reminder link + push work.
+- [ ] Typecheck + build pass.
 
 ---
 
@@ -246,15 +270,14 @@ Designed-for, not built. Drops in without disturbing existing code (plan §9):
 
 - **Rebrand scope:** `@repo` → `@shirtify` and delete placeholders. _[Phase 0 — needs your OK]_
 - **Seeded seller credentials / her real brand assets:** name, logo, colours,
-  welcome voice. _[Phase 0 placeholder, real values by Phase 5]_
+  welcome voice. _[Phase 0 placeholder, real values by Phase 7]_
+- **Design system:** out of scope for these phases — frontend consumes existing
+  `@shirtify/ui` primitives. A dedicated design pass is a separate track. _[separate]_
 - **Canvas module tier:** Tier-1 (build-time package) now; revisit Tier-2 (runtime
-  remote) / Tier-3 (embed) only when a second consumer appears. _[any phase, review]_
-- **Export presets / custom-size UI:** confirm the preset list. _[Phase 4]_
-- **Notifications:** web push only, or push + email on submit. _[Phase 5]_
+  remote) / Tier-3 (embed) only when a second consumer appears. _[review]_
+- **Export presets / custom-size UI:** confirm the preset list. _[Phase 1 backend / Phase 6 UI]_
+- **Notifications:** web push only, or push + email on submit. _[Phase 1 / Phase 7]_
 - **Live in-progress preview:** cut for MVP (seller sees a design only once
-  submitted). Revisit if she wants to watch designs mid-flight. _[post-MVP]_
+  submitted). _[post-MVP]_
 - **Hosting / deploy target** for backend + Mongo (Railway alongside file-service?).
   _[before launch]_
-- **Phase parallelism:** a design-system pass on `@shirtify/ui` could run in
-  parallel with backend work since they don't overlap. _[review]_
-```

@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { Repeat } from 'meemaw';
 
-import { AppLayerRow, type AppLayerKind } from '@repo/ui';
+import { AppLayerRow, type AppLayerKind } from '@shirtify/ui';
 
 import { Section, ComponentRow } from './preview-canvas.tsx';
 

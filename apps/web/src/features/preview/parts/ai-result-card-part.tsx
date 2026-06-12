@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { AppAiResultCard } from '@repo/ui';
+import { AppAiResultCard } from '@shirtify/ui';
 
 import { Section, ComponentRow } from './preview-canvas.tsx';
 

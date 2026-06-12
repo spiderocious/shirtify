@@ -1,4 +1,4 @@
-import { AppButton, DrawerService } from '@repo/ui';
+import { AppButton, DrawerService } from '@shirtify/ui';
 
 import { Section, ComponentRow } from './preview-canvas.tsx';
 

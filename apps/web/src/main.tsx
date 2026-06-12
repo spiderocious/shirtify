@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { configureApiClient } from '@repo/api';
+import { configureApiClient } from '@shirtify/api';
 
 // Shirtify type stack (self-hosted via @fontsource):
 // Archivo Black shouts, Space Grotesk works, JetBrains Mono keeps the record.

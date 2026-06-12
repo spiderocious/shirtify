@@ -1,5 +1,5 @@
 {
-  "name": "@repo/core",
+  "name": "@shirtify/core",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -13,6 +13,9 @@
     "typecheck": "tsc --noEmit",
     "build": "tsc -p tsconfig.build.json",
     "lint": "eslint --config ../../eslint.config.mjs 'src/**/*.{ts,tsx}'"
+  },
+  "dependencies": {
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "typescript": "^5.8.3"

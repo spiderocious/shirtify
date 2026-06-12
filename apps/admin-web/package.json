@@ -1,5 +1,5 @@
 {
-  "name": "@repo/admin-web",
+  "name": "@shirtify/admin-web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -12,9 +12,9 @@
     "lint": "eslint --config ../../eslint.config.mjs 'src/**/*.{ts,tsx}'"
   },
   "dependencies": {
-    "@repo/api": "workspace:*",
-    "@repo/core": "workspace:*",
-    "@repo/ui": "workspace:*",
+    "@shirtify/api": "workspace:*",
+    "@shirtify/core": "workspace:*",
+    "@shirtify/ui": "workspace:*",
     "@tanstack/react-query": "^5.62.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

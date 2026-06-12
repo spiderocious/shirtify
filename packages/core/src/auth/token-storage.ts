@@ -22,13 +22,26 @@ const noopStorage: TokenStorage = {
   remove: () => undefined,
 };
 
+// Minimal structural type so this file compiles without the DOM lib (core is
+// also consumed by DOM-less Node backends). At runtime this resolves to the
+// real localStorage in the browser.
+interface WebStorageLike {
+  getItem(key: string): string | null;
+  setItem(key: string, value: string): void;
+  removeItem(key: string): void;
+}
+
+const getLocalStorage = (): WebStorageLike | undefined => {
+  const g = globalThis as { localStorage?: WebStorageLike };
+  return g.localStorage;
+};
+
 export const createTokenStorage = (): TokenStorage => {
-  if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
-    return noopStorage;
-  }
+  const storage = getLocalStorage();
+  if (!storage) return noopStorage;
   return {
-    get: (key) => window.localStorage.getItem(key),
-    set: (key, value) => window.localStorage.setItem(key, value),
-    remove: (key) => window.localStorage.removeItem(key),
+    get: (key) => storage.getItem(key),
+    set: (key, value) => storage.setItem(key, value),
+    remove: (key) => storage.removeItem(key),
   };
 };
