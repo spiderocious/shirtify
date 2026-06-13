@@ -7,6 +7,7 @@ import { createMongoColorRepo } from './mongo/color.repo.js';
 import { createMongoMaterialRepo } from './mongo/material.repo.js';
 import { createMongoIdempotencyRepo } from './mongo/idempotency.repo.js';
 import { createMongoPushSubscriptionRepo } from './mongo/push-subscription.repo.js';
+import { createMongoAiJobRepo } from './mongo/ai-job.repo.js';
 
 /**
  * Composition root for the data layer. The ONE place that picks the concrete
@@ -26,6 +27,7 @@ export const getRepos = (): Repositories => {
       materials: createMongoMaterialRepo(),
       idempotency: createMongoIdempotencyRepo(),
       pushSubscriptions: createMongoPushSubscriptionRepo(),
+      aiJobs: createMongoAiJobRepo(),
     };
   }
   return repos;

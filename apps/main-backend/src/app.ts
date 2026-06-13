@@ -9,6 +9,7 @@ import { register as registerHealth } from '@features/health/index.js';
 import { register as registerMaterials } from '@features/materials/index.js';
 import { register as registerNotifications } from '@features/notifications/index.js';
 import { register as registerPublic } from '@features/public/index.js';
+import { register as registerAi } from '@features/ai/index.js';
 import { register as registerSessions } from '@features/sessions/index.js';
 import { register as registerStorefront } from '@features/storefront/index.js';
 import { errorHandler } from '@middlewares/errorHandler.middleware.js';
@@ -24,6 +25,7 @@ const features = [
   registerNotifications,
   registerSessions,
   registerStorefront,
+  registerAi,
   registerPublic,
 ];
 

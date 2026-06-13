@@ -83,6 +83,9 @@ export type { EmojiDef } from './constants/emojis.js';
 // API wire schemas
 export * from './schemas/api.js';
 
+// AI design surface (generate / edit / try-on)
+export * from './schemas/ai.js';
+
 // Auth / token storage
 export { createTokenStorage, TOKEN_KEYS } from './auth/token-storage.js';
 export type { TokenStorage } from './auth/token-storage.js';

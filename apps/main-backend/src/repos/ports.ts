@@ -9,6 +9,8 @@ import type {
   SessionKind,
   SessionStatus,
   PaginatedResult,
+  AiJob,
+  AiResultImage,
 } from '@shirtify/core';
 
 /**
@@ -128,6 +130,25 @@ export interface AssetRepo {
   byStorageKey(key: string): Promise<Asset | null>;
 }
 
+export interface NewAiJob {
+  session_id: string;
+  seller_id?: string;
+  kind: AiJob['kind'];
+  prompt: string;
+  layer_id?: string;
+}
+
+export interface AiJobRepo {
+  create(input: NewAiJob): Promise<AiJob>;
+  byId(id: string): Promise<AiJob | null>;
+  /** Mark running/done/failed. `results` set on success, `error` on failure. */
+  setStatus(
+    id: string,
+    status: AiJob['status'],
+    patch?: { results?: AiResultImage[]; error?: string },
+  ): Promise<AiJob | null>;
+}
+
 export interface PushSubscriptionRecord {
   id: string;
   seller_id: string;
@@ -199,4 +220,5 @@ export interface Repositories {
   materials: MaterialRepo;
   idempotency: IdempotencyRepo;
   pushSubscriptions: PushSubscriptionRepo;
+  aiJobs: AiJobRepo;
 }

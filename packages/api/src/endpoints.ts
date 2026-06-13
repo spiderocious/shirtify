@@ -31,6 +31,12 @@ export const EP = {
   PUBLIC_ASSETS: (token: string) => `api/v1/c/${token}/assets`,
   PUBLIC_SUBMIT: (token: string) => `api/v1/c/${token}/submit`,
 
+  // AI design surface (token = key)
+  PUBLIC_AI_GENERATE: (token: string) => `api/v1/c/${token}/ai/generate`,
+  PUBLIC_AI_EDIT: (token: string) => `api/v1/c/${token}/ai/edit`,
+  PUBLIC_AI_TRYON: (token: string) => `api/v1/c/${token}/ai/tryon`,
+  PUBLIC_AI_JOB: (token: string, id: string) => `api/v1/c/${token}/ai/jobs/${id}`,
+
   // Storefront (public)
   STOREFRONT: (slug: string) => `api/v1/s/${slug}`,
   STOREFRONT_START: (slug: string) => `api/v1/s/${slug}/start`,

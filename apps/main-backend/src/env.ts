@@ -19,6 +19,9 @@ const EnvSchema = z.object({
   // Storage — external R2 file-service (presigned-URL proxy)
   FILE_SERVICE_URL: z.string().url().default('https://go-file-service-production.up.railway.app'),
 
+  // AI image provider (optional — falls back to an offline fake when absent)
+  OPENAI_API_KEY: z.string().optional(),
+
   // Web push (optional in dev; required to actually send notifications)
   VAPID_PUBLIC_KEY: z.string().optional(),
   VAPID_PRIVATE_KEY: z.string().optional(),

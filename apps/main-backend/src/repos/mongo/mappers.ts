@@ -5,12 +5,14 @@ import {
   AssetSchema,
   ColorSchema,
   MaterialSchema,
+  AiJobSchema,
   type Seller,
   type Session,
   type Design,
   type Asset,
   type Color,
   type Material,
+  type AiJob,
 } from '@shirtify/core';
 
 import type { SellerDoc } from '@db/models/seller.model.js';
@@ -19,6 +21,7 @@ import type { DesignDoc } from '@db/models/design.model.js';
 import type { AssetDoc } from '@db/models/asset.model.js';
 import type { ColorDoc } from '@db/models/color.model.js';
 import type { MaterialDoc } from '@db/models/material.model.js';
+import type { AiJobDoc } from '@db/models/ai-job.model.js';
 import type { SellerRecord } from '@repos/ports.js';
 
 /**
@@ -117,4 +120,21 @@ export const toMaterial = (doc: MaterialDoc): Material =>
     image_key: doc.image_key ?? null,
     builtin_shape: doc.builtin_shape ?? null,
     created_at: iso(doc.created_at) ?? new Date().toISOString(),
+  });
+
+export const toAiJob = (doc: AiJobDoc): AiJob =>
+  AiJobSchema.parse({
+    id: doc._id.toString(),
+    session_id: doc.session_id.toString(),
+    kind: doc.kind,
+    status: doc.status,
+    results: (doc.results ?? []).map((r) => ({
+      storage_key: r.storage_key,
+      width: r.width ?? null,
+      height: r.height ?? null,
+    })),
+    layer_id: doc.layer_id ?? null,
+    error: doc.error ?? null,
+    created_at: iso(doc.created_at) ?? new Date().toISOString(),
+    updated_at: iso(doc.updated_at) ?? new Date().toISOString(),
   });
