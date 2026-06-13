@@ -62,6 +62,17 @@ export const createMongoSessionRepo = (): SessionRepo => ({
     };
   },
 
+  async listPublicBySeller(sellerId: string, limit: number): Promise<Session[]> {
+    const docs = await SessionModel.find({
+      seller_id: new Types.ObjectId(sellerId),
+      status: 'submitted',
+      visibility: 'public',
+    })
+      .sort({ _id: -1 })
+      .limit(limit);
+    return docs.map(toSession);
+  },
+
   async setStatus(
     id: string,
     status: SessionStatus,
@@ -76,7 +87,10 @@ export const createMongoSessionRepo = (): SessionRepo => ({
   async patch(
     id: string,
     patch: Partial<
-      Pick<Session, 'customer_name' | 'status' | 'shirt_type' | 'shirt_color' | 'material_slug'>
+      Pick<
+        Session,
+        'customer_name' | 'status' | 'shirt_type' | 'shirt_color' | 'material_slug' | 'visibility'
+      >
     >,
   ): Promise<Session | null> {
     const doc = await SessionModel.findByIdAndUpdate(id, patch, { new: true });

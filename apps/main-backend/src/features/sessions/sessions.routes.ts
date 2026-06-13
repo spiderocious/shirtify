@@ -13,6 +13,7 @@ import {
   getSessionDetail,
   archiveSession,
   editSession,
+  setSessionVisibility,
 } from './sessions.service.js';
 
 const router: IRouter = Router();
@@ -63,6 +64,11 @@ router.patch(
 
     if (body.status === 'archived') {
       const session = await archiveSession(sellerId, id);
+      return ResponseUtil.ok(res, { session });
+    }
+
+    if (body.visibility !== undefined) {
+      const session = await setSessionVisibility(sellerId, id, body.visibility);
       return ResponseUtil.ok(res, { session });
     }
 

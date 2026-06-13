@@ -1,8 +1,11 @@
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect } from 'vitest';
 
+import { __setRateLimitEnabled } from '../../middlewares/rateLimit.middleware.js';
 import { api, seedSeller, bearer } from '../../test/helpers.js';
 
 describe('hardening (BUG-02 / 03 / 04)', () => {
+  // The limiter is off by default in tests; turn it back off after this file.
+  afterEach(() => __setRateLimitEnabled(false));
   it('BUG-02: malformed JSON body returns 400, not 500', async () => {
     const res = await api()
       .post('/api/v1/auth/login')
@@ -14,6 +17,7 @@ describe('hardening (BUG-02 / 03 / 04)', () => {
   });
 
   it('BUG-03: /auth/login rate-limits after the window cap with 429 + Retry-After', async () => {
+    __setRateLimitEnabled(true); // enable for this assertion only
     // Limiter: 10 per 15min per IP. The 11th attempt should be throttled.
     let throttled: { status: number; retryAfter: string | undefined } | null = null;
     for (let i = 0; i < 12; i++) {

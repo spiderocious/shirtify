@@ -1,14 +1,19 @@
 import { AppSkeleton, AppEmptyState } from '@shirtify/ui';
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { usePublicSession } from '../api/use-public-session.ts';
 import { DesignProvider } from '../providers/design-provider.tsx';
+import { loadDesignFonts } from '../utils/load-design-fonts.ts';
 import { DesignEditor } from './parts/design-editor.tsx';
 import { SubmitConfirmation } from './parts/submit-confirmation.tsx';
 
 export default function DesignScreen() {
   const { token = '' } = useParams();
   const { data, isLoading, isError } = usePublicSession(token);
+
+  // Load every design font so the canvas renders all of them (not just 4).
+  useEffect(() => loadDesignFonts(), []);
 
   if (isLoading) {
     return (

@@ -6,6 +6,7 @@ import {
   type AuthResponse,
   type Seller,
   type UpdateBrandBody,
+  type SubmitBusinessBody,
 } from '@shirtify/core';
 
 import {
@@ -118,6 +119,27 @@ export const updateBrand = async (
   if (patch.visible_materials !== undefined) update.visible_materials = patch.visible_materials;
 
   const record = await repos.sellers.patchBrand(sellerId, update);
+  if (!record) throw new NotFoundError('Seller');
+  return toSeller(record);
+};
+
+/**
+ * Staged onboarding: persist the business details and advance the seller from
+ * AWAITING_BUSINESS_SUBMISSION → BUSINESS_SUBMITTED (idempotent if re-submitted).
+ */
+export const submitBusiness = async (
+  sellerId: string,
+  input: SubmitBusinessBody,
+): Promise<Seller> => {
+  const repos = getRepos();
+  const record = await repos.sellers.patchBrand(sellerId, {
+    business_name: input.business_name,
+    ...(input.description !== undefined && { description: input.description }),
+    ...(input.storefront_color !== undefined && { storefront_color: input.storefront_color }),
+    ...(input.storefront_font !== undefined && { storefront_font: input.storefront_font }),
+    ...(input.brand_logo_key !== undefined && { brand_logo_key: input.brand_logo_key }),
+    registration_status: 'BUSINESS_SUBMITTED',
+  });
   if (!record) throw new NotFoundError('Seller');
   return toSeller(record);
 };

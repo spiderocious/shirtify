@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useSessions } from '../api/use-sessions.ts';
 import { InboxToolbar, type Filter } from './parts/inbox-toolbar.tsx';
+import { SessionsCards } from './parts/sessions-cards.tsx';
 import { SessionsTable } from './parts/sessions-table.tsx';
 
 export default function SessionsInboxScreen() {
@@ -80,7 +81,12 @@ export default function SessionsInboxScreen() {
                 />
               }
             >
-              <SessionsTable rows={data?.items ?? []} />
+              <div className="hidden sm:block">
+                <SessionsTable rows={data?.items ?? []} />
+              </div>
+              <div className="sm:hidden">
+                <SessionsCards rows={data?.items ?? []} />
+              </div>
               <div className="mt-4 flex items-center justify-between">
                 <AppButton
                   variant="secondary"

@@ -1,11 +1,11 @@
-import { UpdateBrandBody } from '@shirtify/core';
+import { UpdateBrandBody, SubmitBusinessBody } from '@shirtify/core';
 import { Router, type IRouter } from 'express';
 
 import { asyncHandler } from '@lib/http/asyncHandler.js';
 import { ResponseUtil } from '@lib/response.js';
 import { requireAuth, currentSellerId } from '@middlewares/auth.middleware.js';
 
-import { getSellerById, updateBrand } from './auth.service.js';
+import { getSellerById, updateBrand, submitBusiness } from './auth.service.js';
 
 const router: IRouter = Router();
 
@@ -25,6 +25,17 @@ router.patch(
   asyncHandler(async (req, res) => {
     const body = UpdateBrandBody.parse(req.body);
     const seller = await updateBrand(currentSellerId(), body);
+    return ResponseUtil.ok(res, { seller });
+  }),
+);
+
+// PATCH /api/v1/me/business — staged onboarding: submit business → advance status.
+router.patch(
+  '/business',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const body = SubmitBusinessBody.parse(req.body);
+    const seller = await submitBusiness(currentSellerId(), body);
     return ResponseUtil.ok(res, { seller });
   }),
 );

@@ -6,7 +6,9 @@ import { type ToolId } from './tool-panel.tsx';
 const TOOLS: readonly AppTool[] = [
   { id: 'text', label: 'Text', glyph: 'T' },
   { id: 'image', label: 'Image', glyph: '⬚' },
-  { id: 'colour', label: 'Colour', glyph: '◑' },
+  { id: 'shapes', label: 'Shapes', glyph: '★' },
+  { id: 'filters', label: 'Filters', glyph: '◑' },
+  { id: 'colour', label: 'Colour', glyph: '⬤' },
 ];
 
 /** Bottom-pinned tool dock. Selecting Text immediately adds a text layer. */

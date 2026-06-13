@@ -10,8 +10,10 @@ describe('storefront (public "second in")', () => {
     expect(res.status).toBe(200);
     const data = StorefrontResponse.parse(res.body.data);
     expect(data.brand.business_name).toBe('Lagos Threads');
-    expect(data.shirt_types).toContain('hoodie');
     expect(data.shirt_colors.length).toBeGreaterThan(0);
+    // Materials (built-ins) appear as storefront items.
+    expect(data.materials.map((m) => m.slug)).toContain('hoodie');
+    expect(data.items.some((i) => i.kind === 'material')).toBe(true);
   });
 
   it('404s an unknown storefront', async () => {

@@ -47,10 +47,12 @@ export {
   StorefrontConfig,
   BrandColors,
   SellerRole,
+  RegistrationStatus,
   SessionSchema,
   PublicSessionSchema,
   SessionKind,
   SessionStatus,
+  SessionVisibility,
   DesignSchema,
   AssetSchema,
   AssetKind,
@@ -58,8 +60,13 @@ export {
   ColorScope,
   MaterialSchema,
   MaterialScope,
+  StorefrontItemSchema,
 } from './schemas/domain.js';
-export type { Color, Material } from './schemas/domain.js';
+export type { Color, Material, StorefrontItem } from './schemas/domain.js';
+
+// Templates
+export { TEMPLATES, searchTemplates, applyTemplate } from './constants/templates.js';
+export type { DesignTemplate } from './constants/templates.js';
 
 // API wire schemas
 export * from './schemas/api.js';

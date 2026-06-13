@@ -10,6 +10,7 @@ export const EP = {
   AUTH_LOGOUT: 'api/v1/auth/logout',
   AUTH_ME: 'api/v1/me',
   ME_BRAND: 'api/v1/me/brand',
+  ME_BUSINESS: 'api/v1/me/business',
 
   // Sessions (seller, auth)
   SESSIONS: 'api/v1/sessions',

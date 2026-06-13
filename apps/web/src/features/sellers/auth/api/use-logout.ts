@@ -9,6 +9,7 @@ export const useLogout = () => {
     mutationFn: async () => {
       try {
         await apiClient.post(EP.AUTH_LOGOUT);
+        window.location.href = '/login';
       } catch {
         // Logout is best-effort; clear locally regardless of the server result.
       }

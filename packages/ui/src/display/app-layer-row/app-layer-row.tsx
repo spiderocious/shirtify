@@ -1,3 +1,5 @@
+import { type HTMLAttributes } from 'react';
+
 import { cn } from '../../utils/cn.ts';
 
 /**
@@ -5,26 +7,25 @@ import { cn } from '../../utils/cn.ts';
  * Visual spec: design-system/projects/shirtify/preview/20-layers.html (.layer)
  *
  * One row in the design tool's layer stack. A type-tinted thumbnail (text /
- * image / ai), the layer name, a mono transform read, and an eye toggle. The
- * selected row fills lime and lifts onto its shadow. Controlled — pass
- * `selected` + `onSelect` + `visible` + `onToggleVisible`.
+ * image / shape / ai), the layer name, a mono transform read, and a trash
+ * action. The selected row fills lime and lifts onto its shadow. Drag props
+ * (draggable, onDragStart/Over/Drop) pass through for reorder-by-drag.
  */
-export type AppLayerKind = 'text' | 'image' | 'ai';
+export type AppLayerKind = 'text' | 'image' | 'shape' | 'ai';
 
-export interface AppLayerRowProps {
+export interface AppLayerRowProps extends HTMLAttributes<HTMLDivElement> {
   readonly kind: AppLayerKind;
   readonly name: string;
   readonly meta: string;
   readonly selected?: boolean;
-  readonly visible?: boolean;
   readonly onSelect?: () => void;
-  readonly onToggleVisible?: () => void;
-  readonly className?: string;
+  readonly onDelete?: () => void;
 }
 
 const THUMB: Record<AppLayerKind, { className: string; glyph: string }> = {
   text: { className: 'bg-paper-warm text-ink', glyph: 'T' },
   image: { className: 'bg-blue text-white', glyph: '⬚' },
+  shape: { className: 'bg-lime text-lime-ink', glyph: '◆' },
   ai: { className: 'bg-blue text-white', glyph: '✦' },
 };
 
@@ -33,10 +34,10 @@ export function AppLayerRow({
   name,
   meta,
   selected = false,
-  visible = true,
   onSelect,
-  onToggleVisible,
+  onDelete,
   className,
+  ...rest
 }: AppLayerRowProps) {
   const thumb = THUMB[kind];
   return (
@@ -47,8 +48,11 @@ export function AppLayerRow({
         selected ? 'bg-lime shadow-pop-sm' : 'bg-paper-warm',
         className,
       )}
+      {...rest}
     >
-      <span className="font-mono text-sm text-ink-3">⠿</span>
+      <span className="font-mono text-sm text-ink-3" aria-hidden>
+        ⠿
+      </span>
       <span
         className={cn(
           'flex h-9 w-9 shrink-0 items-center justify-center border-2.5 border-ink font-display text-[11px]',
@@ -68,17 +72,19 @@ export function AppLayerRow({
           {meta}
         </span>
       </span>
-      <button
-        type="button"
-        aria-label={visible ? 'Hide layer' : 'Show layer'}
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggleVisible?.();
-        }}
-        className={cn('text-[15px]', visible ? 'text-ink' : 'text-ink-4')}
-      >
-        {visible ? '●' : '◌'}
-      </button>
+      {onDelete ? (
+        <button
+          type="button"
+          aria-label="Delete layer"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          className="flex h-7 w-7 items-center justify-center text-base text-crit hover:bg-crit hover:text-white"
+        >
+          🗑
+        </button>
+      ) : null}
     </div>
   );
 }

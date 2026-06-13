@@ -8,6 +8,7 @@ import {
   PublicSessionSchema,
   PublicBrandSchema,
   MaterialSchema,
+  StorefrontItemSchema,
   SessionStatus,
 } from './domain.js';
 import { ShirtTypeSchema, SceneSchema } from './scene.js';
@@ -63,13 +64,15 @@ export const CreateSessionBody = z.object({
 });
 export type CreateSessionBody = z.infer<typeof CreateSessionBody>;
 
-// Shirt type/colour/material are editable after creation; status → archived.
+// Shirt type/colour/material editable after creation; status → archived;
+// visibility toggles whether a submitted design appears on the storefront.
 export const PatchSessionBody = z.object({
   status: z.literal('archived').optional(),
   shirt_type: ShirtTypeSchema.optional(),
   shirt_color: z.string().min(1).optional(),
   material_slug: z.string().nullable().optional(),
   customer_name: z.string().min(1).optional(),
+  visibility: z.enum(['private', 'public']).optional(),
 });
 export type PatchSessionBody = z.infer<typeof PatchSessionBody>;
 
@@ -126,10 +129,11 @@ export type SubmitBody = z.infer<typeof SubmitBody>;
 // ---- Storefront ----
 export const StorefrontResponse = z.object({
   brand: PublicBrandSchema,
-  shirt_types: z.array(ShirtTypeSchema),
   shirt_colors: z.array(z.string()),
-  /** Materials the seller chose to show (platform ∪ her own, filtered by config). */
+  /** Materials the seller offers (filtered by visible_materials config). */
   materials: z.array(MaterialSchema),
+  /** Storefront cards: materials + public designed sessions. */
+  items: z.array(StorefrontItemSchema),
 });
 export type StorefrontResponse = z.infer<typeof StorefrontResponse>;
 
@@ -137,6 +141,10 @@ export const StartSessionBody = z.object({
   shirt_type: ShirtTypeSchema,
   shirt_color: z.string().min(1),
   material_slug: z.string().optional(),
+  /** Customer's name, captured at storefront entry. */
+  customer_name: z.string().min(1).optional(),
+  /** Clone a public session's design into the new session (storefront "use this"). */
+  from_token: z.string().optional(),
 });
 export type StartSessionBody = z.infer<typeof StartSessionBody>;
 
@@ -201,6 +209,17 @@ export const UpdateBrandBody = z.object({
   visible_materials: z.array(z.string()).nullable().optional(),
 });
 export type UpdateBrandBody = z.infer<typeof UpdateBrandBody>;
+
+/** Staged onboarding: the store-setup form. Submitting flips registration_status
+ *  to BUSINESS_SUBMITTED. business_name is required here (unlike a later edit). */
+export const SubmitBusinessBody = z.object({
+  business_name: z.string().min(1).max(80),
+  description: z.string().max(500).optional(),
+  storefront_color: hex.optional(),
+  storefront_font: z.string().optional(),
+  brand_logo_key: z.string().optional(),
+});
+export type SubmitBusinessBody = z.infer<typeof SubmitBusinessBody>;
 
 // ---- Materials (seller-managed) ----
 export const CreateMaterialBody = z.object({
