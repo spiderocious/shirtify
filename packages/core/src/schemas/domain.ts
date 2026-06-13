@@ -12,6 +12,18 @@ export const SellerRole = z.enum(['seller', 'admin']);
 export type SellerRole = z.infer<typeof SellerRole>;
 
 /**
+ * Onboarding stage. After email/password registration a seller is
+ * AWAITING_BUSINESS_SUBMISSION and is forced through the (unskippable) store
+ * setup page; once they submit business details they're BUSINESS_SUBMITTED and
+ * can reach the dashboard. Shared enum — backend sets it, frontend routes on it.
+ */
+export const RegistrationStatus = z.enum([
+  'AWAITING_BUSINESS_SUBMISSION',
+  'BUSINESS_SUBMITTED',
+]);
+export type RegistrationStatus = z.infer<typeof RegistrationStatus>;
+
+/**
  * A shirt base colour. Colours are data, not a hardcoded enum: platform colours
  * (scope 'platform', seeded defaults, available to everyone) plus per-seller
  * colours (scope 'seller', her own stock). `shirt_color` on a session must match
@@ -88,6 +100,7 @@ export const SellerSchema = z.object({
   storefront_color: z.string().nullable(),
   storefront_font: z.string().nullable(),
   visible_materials: z.array(z.string()).nullable(),
+  registration_status: RegistrationStatus,
   role: SellerRole,
   created_at: z.string(), // ISO 8601
 });
@@ -112,6 +125,10 @@ export type SessionKind = z.infer<typeof SessionKind>;
 export const SessionStatus = z.enum(['in_progress', 'submitted', 'archived']);
 export type SessionStatus = z.infer<typeof SessionStatus>;
 
+/** Whether a (submitted) session's design is featured on the storefront. */
+export const SessionVisibility = z.enum(['private', 'public']);
+export type SessionVisibility = z.infer<typeof SessionVisibility>;
+
 export const SessionSchema = z.object({
   id: z.string(),
   seller_id: z.string(),
@@ -126,6 +143,7 @@ export const SessionSchema = z.object({
   price_quoted: z.number().int().nullable(), // minor units (kobo/cents)
   notes: z.string().nullable(),
   status: SessionStatus,
+  visibility: SessionVisibility,
   created_at: z.string(),
   last_activity_at: z.string(),
 });
@@ -158,6 +176,33 @@ export type Design = z.infer<typeof DesignSchema>;
 
 export const AssetKind = z.enum(['upload', 'export', 'logo', 'ai', 'material']);
 export type AssetKind = z.infer<typeof AssetKind>;
+
+/**
+ * A card shown on a seller's public storefront — either a bare material the
+ * seller offers, or a public designed session (a ready-made design a customer
+ * can clone and tweak). The customer clicks one → enters a name → designs.
+ */
+export const StorefrontItemSchema = z.discriminatedUnion('kind', [
+  z.object({
+    kind: z.literal('material'),
+    slug: z.string(),
+    label: z.string(),
+    image_key: z.string().nullable(),
+    builtin_shape: z.string().nullable(),
+  }),
+  z.object({
+    kind: z.literal('design'),
+    /** The public session's token — used to clone its design. */
+    token: z.string(),
+    label: z.string(),
+    shirt_type: ShirtTypeSchema,
+    shirt_color: z.string(),
+    material_slug: z.string().nullable(),
+    /** Front scene for a thumbnail preview (rendered client-side). */
+    preview: SceneSchema,
+  }),
+]);
+export type StorefrontItem = z.infer<typeof StorefrontItemSchema>;
 
 export const AssetSchema = z.object({
   id: z.string(),

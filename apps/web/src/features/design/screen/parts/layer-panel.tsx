@@ -1,20 +1,36 @@
 import { type Layer } from '@shirtify/core';
-import { AppText, AppLayerRow, AppButton, AppEmptyState } from '@shirtify/ui';
+import { AppText, AppLayerRow, AppEmptyState, type AppLayerKind } from '@shirtify/ui';
 import { Show, Repeat } from '@shirtify/ui/flow';
+import { useState } from 'react';
 
 import { useDesign } from '../../providers/design-provider.tsx';
 
-const layerName = (layer: Layer): string =>
-  layer.kind === 'text' ? layer.text || 'Text' : 'Image';
+const layerName = (layer: Layer): string => {
+  if (layer.kind === 'text') return layer.text || 'Text';
+  if (layer.kind === 'shape') return `${layer.shape} shape`;
+  return 'Image';
+};
 
 const layerMeta = (layer: Layer): string =>
-  `${Math.round(layer.scale * 100)}% · ${Math.round(layer.rotation)}°`;
+  `${layer.kind} · ${Math.round(layer.scale * 100)}% · ${Math.round(layer.rotation)}°`;
 
-/** The layer stack — select, reorder (z-order), delete. Top of list = top layer. */
+/** Layer stack — select, drag to reorder (z-order), delete. Top of list = top layer. */
 export function LayerPanel() {
-  const { activeScene, selectedLayerId, selectLayer, reorderLayer, removeLayer } = useDesign();
+  const { activeScene, selectedLayerId, selectLayer, moveLayerToIndex, removeLayer } = useDesign();
+  const [dragId, setDragId] = useState<string | null>(null);
+
   // Render top layer first (reverse of array order, which is bottom→top).
   const ordered = [...activeScene.layers].reverse();
+
+  const onDrop = (targetId: string) => {
+    if (!dragId || dragId === targetId) return;
+    // Map display (reversed) positions back to scene (bottom→top) indices.
+    const sceneLen = activeScene.layers.length;
+    const targetDisplayIdx = ordered.findIndex((l) => l.id === targetId);
+    const sceneIndex = sceneLen - 1 - targetDisplayIdx;
+    moveLayerToIndex(dragId, sceneIndex);
+    setDragId(null);
+  };
 
   return (
     <div className="flex flex-col gap-2.5">
@@ -25,7 +41,7 @@ export function LayerPanel() {
           <AppEmptyState
             glyph="✎"
             title="Nothing yet"
-            description="Add text or an image to start your design."
+            description="Add text, an image, or a shape to start your design."
             className="!px-4 !py-6"
           />
         }
@@ -33,47 +49,27 @@ export function LayerPanel() {
         <div className="flex flex-col gap-1.5">
           <Repeat each={ordered}>
             {(layer) => (
-              <div key={layer.id} className="flex items-stretch gap-1.5">
-                <AppLayerRow
-                  kind={layer.kind === 'image' ? 'image' : 'text'}
-                  name={layerName(layer)}
-                  meta={layerMeta(layer)}
-                  selected={layer.id === selectedLayerId}
-                  onSelect={() => selectLayer(layer.id)}
-                  className="flex-1"
-                />
-                <div className="flex flex-col">
-                  <button
-                    type="button"
-                    aria-label="Move up"
-                    onClick={() => reorderLayer(layer.id, 1)}
-                    className="flex-1 border-2.5 border-b-0 border-ink px-2 text-xs hover:bg-go-tint"
-                  >
-                    ↑
-                  </button>
-                  <button
-                    type="button"
-                    aria-label="Move down"
-                    onClick={() => reorderLayer(layer.id, -1)}
-                    className="flex-1 border-2.5 border-ink px-2 text-xs hover:bg-go-tint"
-                  >
-                    ↓
-                  </button>
-                </div>
-              </div>
+              <AppLayerRow
+                key={layer.id}
+                kind={layer.kind as AppLayerKind}
+                name={layerName(layer)}
+                meta={layerMeta(layer)}
+                selected={layer.id === selectedLayerId}
+                onSelect={() => selectLayer(layer.id)}
+                onDelete={() => removeLayer(layer.id)}
+                draggable
+                onDragStart={() => setDragId(layer.id)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => onDrop(layer.id)}
+                onDragEnd={() => setDragId(null)}
+                className={dragId === layer.id ? 'opacity-50' : undefined}
+              />
             )}
           </Repeat>
         </div>
-        <Show when={selectedLayerId !== null}>
-          <AppButton
-            variant="danger"
-            size="sm"
-            block
-            onClick={() => selectedLayerId && removeLayer(selectedLayerId)}
-          >
-            Delete selected layer
-          </AppButton>
-        </Show>
+        <AppText variant="mono" as="p" className="text-[10px]">
+          Drag to reorder · top of list is the top layer
+        </AppText>
       </Show>
     </div>
   );

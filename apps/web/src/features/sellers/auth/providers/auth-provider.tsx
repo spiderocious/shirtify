@@ -9,6 +9,8 @@ interface AuthContextValue {
   seller: Seller | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  /** True until the seller submits their business details (staged onboarding). */
+  needsBusinessSetup: boolean;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -22,6 +24,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Only "loading" when we actually have a token to validate.
     isLoading: hasToken && isLoading,
     isAuthenticated: hasToken && !isError && seller !== undefined,
+    needsBusinessSetup: seller?.registration_status === 'AWAITING_BUSINESS_SUBMISSION',
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

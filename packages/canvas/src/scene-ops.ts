@@ -1,4 +1,12 @@
-import { generateToken, type Scene, type TextLayer, type ImageLayer, type Layer } from '@shirtify/core';
+import {
+  generateToken,
+  type Scene,
+  type TextLayer,
+  type ImageLayer,
+  type ShapeLayer,
+  type ShapeKind,
+  type Layer,
+} from '@shirtify/core';
 
 /**
  * Pure scene mutations the host editor uses to add/remove/reorder layers. Keeps
@@ -41,6 +49,21 @@ export const addImageLayer = (scene: Scene, assetKey: string): { scene: Scene; l
   return { scene: { ...scene, layers: [...scene.layers, layer] }, layerId: layer.id };
 };
 
+export const addShapeLayer = (
+  scene: Scene,
+  shape: ShapeKind,
+  fill = '#1F6BFF',
+): { scene: Scene; layerId: string } => {
+  const layer: ShapeLayer = {
+    ...baseLayer(),
+    kind: 'shape',
+    shape,
+    fill,
+    size: 0.25,
+  };
+  return { scene: { ...scene, layers: [...scene.layers, layer] }, layerId: layer.id };
+};
+
 export const removeLayer = (scene: Scene, layerId: string): Scene => ({
   ...scene,
   layers: scene.layers.filter((l) => l.id !== layerId),
@@ -55,5 +78,17 @@ export const reorderLayer = (scene: Scene, layerId: string, direction: 1 | -1): 
   const layers: Layer[] = [...scene.layers];
   const [moved] = layers.splice(idx, 1);
   if (moved) layers.splice(target, 0, moved);
+  return { ...scene, layers };
+};
+
+/** Move a layer to an absolute z-index (drag-to-reorder). */
+export const moveLayerToIndex = (scene: Scene, layerId: string, index: number): Scene => {
+  const from = scene.layers.findIndex((l) => l.id === layerId);
+  if (from < 0) return scene;
+  const layers: Layer[] = [...scene.layers];
+  const [moved] = layers.splice(from, 1);
+  if (!moved) return scene;
+  const clamped = Math.max(0, Math.min(index, layers.length));
+  layers.splice(clamped, 0, moved);
   return { ...scene, layers };
 };

@@ -24,6 +24,7 @@ import { toApiError } from '@shared/api/api-error.ts';
 
 import { useColors } from '../../api/use-colors.ts';
 import { useCreateSession } from '../../api/use-create-session.ts';
+import { useMaterials } from '../../../materials/api/use-materials.ts';
 
 const shirtTypeOptions = SHIRT_TYPES.map((t) => ({ value: t, label: SHIRT_TYPE_LABELS[t] }));
 
@@ -31,12 +32,14 @@ export function NewSessionForm() {
   const navigate = useNavigate();
   const create = useCreateSession();
   const { data: colors, isLoading: colorsLoading } = useColors();
+  const { data: materials } = useMaterials();
 
   // One idempotency key per form instance — stable across retries of this intent.
   const idemKey = useMemo(() => idempotencyKey(), []);
 
   const [customerName, setCustomerName] = useState('');
   const [shirtType, setShirtType] = useState<ShirtType>('tee');
+  const [materialSlug, setMaterialSlug] = useState('');
   const [shirtColor, setShirtColor] = useState<string>('');
   const [priceNaira, setPriceNaira] = useState('');
   const [notes, setNotes] = useState('');
@@ -66,6 +69,7 @@ export function NewSessionForm() {
     const body: CreateSessionBody = {
       shirt_type: shirtType,
       shirt_color: shirtColor,
+      ...(materialSlug && { material_slug: materialSlug }),
       ...(customerName.trim() && { customer_name: customerName.trim() }),
       ...(notes.trim() && { notes: notes.trim() }),
       ...(priceNaira.trim() && { price_quoted: Math.round(Number(priceNaira) * 100) }),
@@ -104,6 +108,22 @@ export function NewSessionForm() {
             options={shirtTypeOptions}
             value={shirtType}
             onChange={(e) => setShirtType(e.target.value as ShirtType)}
+          />
+        </AppField>
+
+        <AppField
+          label="Material"
+          hint="Your own photo, or built-in by type."
+          htmlFor="material"
+        >
+          <AppSelect
+            id="material"
+            options={[
+              { value: '', label: 'Built-in (by type)' },
+              ...(materials ?? []).map((m) => ({ value: m.slug, label: m.label })),
+            ]}
+            value={materialSlug}
+            onChange={(e) => setMaterialSlug(e.target.value)}
           />
         </AppField>
 

@@ -52,6 +52,7 @@ export interface SellerRepo {
         | 'storefront_color'
         | 'storefront_font'
         | 'visible_materials'
+        | 'registration_status'
       >
     >,
   ): Promise<SellerRecord | null>;
@@ -82,11 +83,16 @@ export interface SessionRepo {
   byToken(token: string): Promise<Session | null>;
   tokenExists(token: string): Promise<boolean>;
   listBySeller(sellerId: string, q: SessionListQuery): Promise<PaginatedResult<Session>>;
+  /** Submitted + public sessions for a seller (storefront cards), newest first. */
+  listPublicBySeller(sellerId: string, limit: number): Promise<Session[]>;
   setStatus(id: string, status: SessionStatus, submittedAt?: string): Promise<Session | null>;
   patch(
     id: string,
     patch: Partial<
-      Pick<Session, 'customer_name' | 'status' | 'shirt_type' | 'shirt_color' | 'material_slug'>
+      Pick<
+        Session,
+        'customer_name' | 'status' | 'shirt_type' | 'shirt_color' | 'material_slug' | 'visibility'
+      >
     >,
   ): Promise<Session | null>;
   touchActivity(id: string): Promise<void>;

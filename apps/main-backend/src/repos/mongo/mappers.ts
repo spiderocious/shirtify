@@ -44,6 +44,7 @@ export const toSellerRecord = (doc: SellerDoc): SellerRecord => {
     storefront_color: doc.storefront_color ?? null,
     storefront_font: doc.storefront_font ?? null,
     visible_materials: doc.visible_materials ?? null,
+    registration_status: doc.registration_status ?? 'AWAITING_BUSINESS_SUBMISSION',
     role: doc.role,
     created_at: iso(doc.created_at) ?? new Date().toISOString(),
   });
@@ -64,6 +65,7 @@ export const toSession = (doc: SessionDoc): Session =>
     price_quoted: doc.price_quoted ?? null,
     notes: doc.notes ?? null,
     status: doc.status,
+    visibility: doc.visibility ?? 'private',
     created_at: iso(doc.created_at) ?? new Date().toISOString(),
     last_activity_at: iso(doc.last_activity_at) ?? new Date().toISOString(),
   });

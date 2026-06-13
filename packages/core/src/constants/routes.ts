@@ -11,9 +11,14 @@ export const ROUTES = {
   REGISTER: '/register',
   FORGOT_PASSWORD: '/forgot-password',
 
-  // Seller dashboard (admin-web)
+  // Seller onboarding (staged registration — unskippable until submitted)
+  SETUP: '/setup',
+
+  // Seller dashboard (tabs)
   DASHBOARD: '/dashboard',
+  DASHBOARD_SESSIONS: '/dashboard/sessions',
   SESSION_DETAIL: (id: string) => `/dashboard/sessions/${id}`,
+  STOREFRONT_MGMT: '/dashboard/storefront',
   BRAND: '/dashboard/brand',
 
   // Customer-facing (web)

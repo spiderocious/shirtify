@@ -1,11 +1,22 @@
 import {
   addTextLayer as addText,
   addImageLayer as addImage,
+  addShapeLayer as addShape,
   removeLayer as removeLayerOp,
   reorderLayer as reorderLayerOp,
+  moveLayerToIndex as moveLayerToIndexOp,
   type NewTextLayerInput,
 } from '@shirtify/canvas';
-import { type Scene, type SceneSide, type Layer, type PublicSessionResponse } from '@shirtify/core';
+import {
+  applyTemplate as applyTemplateOp,
+  type Scene,
+  type SceneSide,
+  type Layer,
+  type ShapeKind,
+  type FilterKind,
+  type DesignTemplate,
+  type PublicSessionResponse,
+} from '@shirtify/core';
 import { createContext, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
 
 import { useSaveDesign } from '../api/use-save-design.ts';
@@ -28,9 +39,13 @@ interface DesignContextValue {
   patchLayer: (id: string, patch: Partial<Layer>) => void;
   addTextLayer: (input?: NewTextLayerInput) => void;
   addImageLayer: (assetKey: string) => void;
+  addShapeLayer: (shape: ShapeKind) => void;
   removeLayer: (id: string) => void;
   reorderLayer: (id: string, direction: 1 | -1) => void;
+  moveLayerToIndex: (id: string, index: number) => void;
   setShirtColor: (color: string) => void;
+  setSceneFilter: (filter: FilterKind) => void;
+  applyTemplate: (template: DesignTemplate) => void;
   replaceScenes: (next: { front: Scene; back: Scene }) => void;
 }
 
@@ -112,13 +127,21 @@ export function DesignProvider({
       commit({ ...latest.current, [side]: scene });
       setSelectedLayerId(layerId);
     },
+    addShapeLayer: (shape) => {
+      const { scene, layerId } = addShape(latest.current[side], shape);
+      commit({ ...latest.current, [side]: scene });
+      setSelectedLayerId(layerId);
+    },
     removeLayer: (id) => {
       updateActive((scene) => removeLayerOp(scene, id));
       setSelectedLayerId((cur) => (cur === id ? null : cur));
     },
     reorderLayer: (id, direction) => updateActive((scene) => reorderLayerOp(scene, id, direction)),
+    moveLayerToIndex: (id, index) => updateActive((scene) => moveLayerToIndexOp(scene, id, index)),
     setShirtColor: (color) =>
       updateActive((scene) => ({ ...scene, shirt: { ...scene.shirt, color } })),
+    setSceneFilter: (filter) => updateActive((scene) => ({ ...scene, filter })),
+    applyTemplate: (template) => updateActive((scene) => applyTemplateOp(scene, template)),
     replaceScenes: commit,
   };
 

@@ -6,6 +6,7 @@ import { toApiError } from '@shared/api/api-error.ts';
 
 import { useSubmitDesign } from '../../api/use-submit-design.ts';
 import { useDesign } from '../../providers/design-provider.tsx';
+import { openTemplateGallery } from '../../widgets/template-gallery.tsx';
 import { CanvasStage } from './canvas-stage.tsx';
 import { DesignTopbar } from './design-topbar.tsx';
 import { DesignToolbar } from './design-toolbar.tsx';
@@ -14,7 +15,7 @@ import { ToolPanel, type ToolId } from './tool-panel.tsx';
 
 /** The full editor: chrome + canvas + tools, plus the submit → confirmation flow. */
 export function DesignEditor() {
-  const { token, context } = useDesign();
+  const { token, context, applyTemplate } = useDesign();
   const submit = useSubmitDesign();
   const [tool, setTool] = useState<ToolId>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -39,11 +40,11 @@ export function DesignEditor() {
 
   return (
     <Show when={!submitted} fallback={<SubmitConfirmation brandName={brandName} />}>
-      <div className="flex min-h-dvh flex-col bg-paper">
+      <div className="flex min-h-dvh flex-col overflow-x-hidden bg-paper pb-28">
         <DesignTopbar />
 
         <div className="flex flex-1 flex-col lg:flex-row">
-          <div className="flex-1">
+          <div className="min-w-0 flex-1">
             <CanvasStage />
           </div>
           <aside className="w-full shrink-0 overflow-y-auto border-t-3 border-ink bg-paper-warm p-4 lg:w-[340px] lg:border-l-3 lg:border-t-0">
@@ -51,10 +52,20 @@ export function DesignEditor() {
           </aside>
         </div>
 
-        <div className="sticky bottom-0 p-3">
-          <div className="mx-auto max-w-3xl">
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t-3 border-ink bg-paper p-3">
+          <div className="mx-auto flex max-w-3xl flex-col gap-2">
+            <div className="flex justify-center">
+              <AppButton
+                variant="ai"
+                size="sm"
+                leadingIcon={<span>✨</span>}
+                onClick={() => openTemplateGallery(applyTemplate)}
+              >
+                Browse templates
+              </AppButton>
+            </div>
             <Show when={submit.isPending}>
-              <AppButton variant="primary" block loading className="mb-2">
+              <AppButton variant="primary" block loading>
                 Sending…
               </AppButton>
             </Show>

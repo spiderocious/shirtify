@@ -4,12 +4,14 @@
 export type {
   Seller,
   SellerRole,
+  RegistrationStatus,
   BrandColors,
   PublicBrand,
   StorefrontConfig,
   Session,
   SessionKind,
   SessionStatus,
+  SessionVisibility,
   PublicSession,
   Design,
   Asset,
@@ -18,6 +20,7 @@ export type {
   ColorScope,
   Material,
   MaterialScope,
+  StorefrontItem,
 } from '../schemas/domain.js';
 
 export type {

@@ -58,6 +58,9 @@ export interface CustomModalOptions {
   closeOnEscape?: boolean;
   sticky?: boolean;
   hideCloseButton?: boolean;
+  /** Render the body with no wrapping card + a lighter scrim — the body owns
+   *  its own chrome. Use for self-contained panels (e.g. the font picker). */
+  bare?: boolean;
   onClose?: () => void;
 }
 
@@ -138,6 +141,7 @@ export const DrawerService = {
       closeOnEscape: options.closeOnEscape ?? true,
       sticky: options.sticky ?? false,
       hideCloseButton: options.hideCloseButton ?? false,
+      bare: options.bare ?? false,
       onCancel: options.onClose,
     });
   },

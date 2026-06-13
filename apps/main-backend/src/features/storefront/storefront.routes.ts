@@ -28,6 +28,8 @@ router.post(
       shirt_type: body.shirt_type,
       shirt_color: body.shirt_color,
       ...(body.material_slug !== undefined && { material_slug: body.material_slug }),
+      ...(body.customer_name !== undefined && { customer_name: body.customer_name }),
+      ...(body.from_token !== undefined && { from_token: body.from_token }),
     });
     return ResponseUtil.created(res, result);
   }),

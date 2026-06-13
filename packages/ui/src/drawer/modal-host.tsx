@@ -119,6 +119,24 @@ function CriticalBody({ entry }: { readonly entry: CriticalModalEntry }) {
 }
 
 function CustomBody({ entry }: { readonly entry: CustomModalEntry }) {
+  // Bare: the body owns its own chrome (no wrapping card), with a floating close.
+  if (entry.bare) {
+    return (
+      <div className="relative">
+        {!entry.hideCloseButton ? (
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={() => closeWith(entry.onCancel)}
+            className="absolute -right-2 -top-2 z-10 flex h-8 w-8 items-center justify-center border-2.5 border-ink bg-paper-warm font-display text-sm text-ink shadow-pop-sm"
+          >
+            ✕
+          </button>
+        ) : null}
+        {entry.body}
+      </div>
+    );
+  }
   return (
     <div className="relative border-3 border-ink bg-paper shadow-pop-lg">
       {!entry.hideCloseButton ? (
@@ -135,6 +153,8 @@ function CustomBody({ entry }: { readonly entry: CustomModalEntry }) {
     </div>
   );
 }
+
+const isBare = (m: ModalEntry): boolean => m.kind === 'custom' && m.bare;
 
 function ModalBody({ entry }: { readonly entry: ModalEntry }) {
   if (entry.kind === 'critical') return <CriticalBody entry={entry} />;
@@ -159,7 +179,12 @@ export function ModalHost() {
 
   return createPortal(
     <div
-      className={cn('shirtify-halftone fixed inset-0 z-[70] flex p-6', POSITION[modal.position])}
+      className={cn(
+        'fixed inset-0 z-[70] flex p-6',
+        // Bare modals use a soft translucent wash; standard ones the halftone scrim.
+        isBare(modal) ? 'bg-ink/40 backdrop-blur-[2px]' : 'shirtify-halftone',
+        POSITION[modal.position],
+      )}
       onClick={() => {
         if (modal.closeOnOutsideClick) closeWith(modal.onCancel);
       }}

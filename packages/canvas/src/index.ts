@@ -7,7 +7,9 @@ export { mount } from './mount.tsx';
 export {
   addTextLayer,
   addImageLayer,
+  addShapeLayer,
   removeLayer,
   reorderLayer,
+  moveLayerToIndex,
   type NewTextLayerInput,
 } from './scene-ops.ts';

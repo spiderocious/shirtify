@@ -18,6 +18,12 @@ const sessionSchema = new Schema(
       default: 'in_progress',
       index: true,
     },
+    visibility: {
+      type: String,
+      enum: ['private', 'public'],
+      default: 'private',
+      index: true,
+    },
     last_activity_at: { type: Date, default: Date.now },
   },
   { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } },

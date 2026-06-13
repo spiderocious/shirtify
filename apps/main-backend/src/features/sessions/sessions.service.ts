@@ -1,6 +1,5 @@
 import {
   generateToken,
-  emptyScene,
   type Session,
   type Design,
   type SessionStatus,
@@ -11,6 +10,7 @@ import {
 import { assertColorAvailable } from '@features/colors/colors.service.js';
 import { assertMaterialAvailable } from '@features/materials/materials.service.js';
 import { NotFoundError } from '@lib/errors.js';
+import { buildInitialScene } from '@shared/design-scene.js';
 import { getRepos } from '@repos/index.js';
 
 /** Generate a session token guaranteed unique against the store. */
@@ -64,12 +64,21 @@ export const createSession = async (
     ...(input.price_quoted !== undefined && { price_quoted: input.price_quoted }),
     ...(input.notes !== undefined && { notes: input.notes }),
   });
-  // Every session gets a blank design (front + back) up front.
-  await repos.designs.createForSession(
-    session.id,
-    emptyScene(session.shirt_type, session.shirt_color),
-    emptyScene(session.shirt_type, session.shirt_color),
+  // Every session gets a blank design (front + back) up front, with the chosen
+  // material's image resolved onto the scene backdrop.
+  const front = await buildInitialScene(
+    sellerId,
+    session.shirt_type,
+    session.shirt_color,
+    session.material_slug ?? undefined,
   );
+  const back = await buildInitialScene(
+    sellerId,
+    session.shirt_type,
+    session.shirt_color,
+    session.material_slug ?? undefined,
+  );
+  await repos.designs.createForSession(session.id, front, back);
 
   if (idempotencyKey) {
     const recorded = await repos.idempotency.record(
@@ -112,6 +121,19 @@ export const getSessionDetail = async (
   return { session, design };
 };
 
+export const setSessionVisibility = async (
+  sellerId: string,
+  id: string,
+  visibility: Session['visibility'],
+): Promise<Session> => {
+  const repos = getRepos();
+  const session = await repos.sessions.byId(id);
+  if (!session || session.seller_id !== sellerId) throw new NotFoundError('Session');
+  const updated = await repos.sessions.patch(id, { visibility });
+  if (!updated) throw new NotFoundError('Session');
+  return updated;
+};
+
 export const archiveSession = async (sellerId: string, id: string): Promise<Session> => {
   const repos = getRepos();
   const session = await repos.sessions.byId(id);
@@ -147,16 +169,22 @@ export const editSession = async (
   const updated = await repos.sessions.patch(id, patch);
   if (!updated) throw new NotFoundError('Session');
 
-  // Mirror shirt type/colour into the design scenes (so the canvas backdrop updates).
+  // Mirror shirt type/colour/material into the design scenes so the canvas
+  // backdrop updates (resolving the material's uploaded image, if any).
   const design = await repos.designs.bySessionId(id);
   if (design) {
+    let materialImageKey: string | undefined;
+    if (updated.material_slug) {
+      const materials = await repos.materials.listForSeller(sellerId);
+      materialImageKey = materials.find((m) => m.slug === updated.material_slug)?.image_key ?? undefined;
+    }
     const applyShirt = (scene: Design['canvas_front']): Design['canvas_front'] => ({
       ...scene,
       shirt: {
-        ...scene.shirt,
         type: updated.shirt_type,
         color: updated.shirt_color,
         ...(updated.material_slug !== null && { materialId: updated.material_slug }),
+        ...(materialImageKey !== undefined && { materialImageKey }),
       },
     });
     await repos.designs.saveCanvas(id, applyShirt(design.canvas_front), applyShirt(design.canvas_back));

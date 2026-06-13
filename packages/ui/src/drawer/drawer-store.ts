@@ -62,6 +62,9 @@ export interface CustomModalEntry extends ModalEntryBase {
   kind: 'custom';
   body: ReactNode;
   hideCloseButton: boolean;
+  /** When true, render the body with NO wrapping card/box — the body owns its
+   *  own chrome, and the scrim becomes a lighter transparent wash. */
+  bare: boolean;
 }
 
 export type ModalEntry = StandardModalEntry | CriticalModalEntry | CustomModalEntry;

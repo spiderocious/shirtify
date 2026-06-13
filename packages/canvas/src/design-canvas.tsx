@@ -5,7 +5,6 @@ import type Konva from 'konva';
 
 import { ImageLayerNode, TextLayerNode, ShapeLayerNode } from './layer-nodes.tsx';
 import { MaterialBackdrop } from './material-backdrop.tsx';
-import { ShirtBackdrop } from './shirt-backdrop.tsx';
 import { toKonvaFilters } from './filters.ts';
 import { useFontsReady } from './use-fonts-ready.ts';
 import type { CanvasOptions, CanvasHandle, ToPNGOptions } from './types.ts';
@@ -49,7 +48,11 @@ export const DesignCanvas = forwardRef<CanvasHandle, DesignCanvasProps>(function
   const containerRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<Konva.Stage | null>(null);
   const trRef = useRef<Konva.Transformer | null>(null);
+  const contentLayerRef = useRef<Konva.Layer | null>(null);
   const nodeRefs = useRef<Map<string, Konva.Node>>(new Map());
+
+  // Re-render text when web fonts finish loading (Konva caches glyph metrics).
+  const fontsTick = useFontsReady();
 
   // Keep internal scenes in sync if the host swaps designs (e.g. data load).
   useEffect(() => setScenes({ front, back }), [front, back]);
@@ -80,6 +83,29 @@ export const DesignCanvas = forwardRef<CanvasHandle, DesignCanvasProps>(function
     tr.nodes(node ? [node] : []);
     tr.getLayer()?.batchDraw();
   }, [selectedLayerId, side, readOnly, activeScene.layers]);
+
+  // Force a redraw once fonts are ready so text renders with the right glyphs.
+  useEffect(() => {
+    contentLayerRef.current?.batchDraw();
+  }, [fontsTick]);
+
+  // Whole-scene filter: cache the content layer with filters when set.
+  useEffect(() => {
+    const layerNode = contentLayerRef.current;
+    if (!layerNode) return;
+    const spec = toKonvaFilters(activeScene.filter ?? 'none');
+    if (spec.filters.length > 0) {
+      layerNode.cache();
+      layerNode.filters(spec.filters);
+      Object.entries(spec.params ?? {}).forEach(([k, v]) => {
+        (layerNode as unknown as Record<string, (val: number) => void>)[k]?.(v);
+      });
+    } else {
+      layerNode.clearCache();
+      layerNode.filters([]);
+    }
+    layerNode.batchDraw();
+  }, [activeScene.filter, activeScene.layers, side, fontsTick]);
 
   const emit = (next: { front: Scene; back: Scene }) => {
     setScenes(next);
@@ -124,16 +150,16 @@ export const DesignCanvas = forwardRef<CanvasHandle, DesignCanvasProps>(function
           if (e.target === e.target.getStage()) onSelectLayer?.(null);
         }}
       >
-        <KonvaLayer>
+        <KonvaLayer listening={false}>
           <Rect width={stageSize} height={stageSize} fill="transparent" />
-          <ShirtBackdrop
-            type={activeScene.shirt.type}
-            color={activeScene.shirt.color}
+          <MaterialBackdrop
+            shirt={activeScene.shirt}
             side={side}
             size={stageSize}
+            resolveAssetUrl={resolveAssetUrl}
           />
         </KonvaLayer>
-        <KonvaLayer>
+        <KonvaLayer ref={contentLayerRef}>
           {activeScene.layers.map((layer) => {
             const common = {
               layer,
@@ -147,11 +173,9 @@ export const DesignCanvas = forwardRef<CanvasHandle, DesignCanvasProps>(function
                 else nodeRefs.current.delete(layer.id);
               },
             };
-            return layer.kind === 'text' ? (
-              <TextLayerNode key={layer.id} {...common} />
-            ) : (
-              <ImageLayerNode key={layer.id} {...common} />
-            );
+            if (layer.kind === 'text') return <TextLayerNode key={layer.id} {...common} />;
+            if (layer.kind === 'shape') return <ShapeLayerNode key={layer.id} {...common} />;
+            return <ImageLayerNode key={layer.id} {...common} />;
           })}
           {!readOnly ? (
             <Transformer

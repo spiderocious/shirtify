@@ -16,8 +16,17 @@ interface Bucket {
 
 const store = new Map<string, Bucket>();
 
+// Rate limiting is disabled by default under tests (so the many seedSeller()
+// registrations across the suite don't trip it). The one test that asserts
+// throttling enables it explicitly via __setRateLimitEnabled(true).
+let enabled = process.env.NODE_ENV !== 'test';
+
 /** Test-only: clear all rate-limit buckets between tests. */
 export const __resetRateLimit = (): void => store.clear();
+/** Test-only: toggle the limiter (used by the throttling test). */
+export const __setRateLimitEnabled = (value: boolean): void => {
+  enabled = value;
+};
 
 // Periodic cleanup so the map doesn't grow unbounded.
 const SWEEP_MS = 60_000;
@@ -41,6 +50,10 @@ export interface RateLimitOptions {
 
 export const rateLimit = ({ bucket, max, windowMs }: RateLimitOptions) => {
   return (req: Request, res: Response, next: NextFunction): void => {
+    if (!enabled) {
+      next();
+      return;
+    }
     const now = Date.now();
     sweep(now);
 
