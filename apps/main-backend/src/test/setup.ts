@@ -6,7 +6,7 @@ import { afterAll, afterEach, beforeAll, beforeEach } from 'vitest';
 process.env.NODE_ENV = 'test';
 process.env.JWT_ACCESS_SECRET = 'test_access_secret_at_least_32_chars_long_ok';
 process.env.JWT_REFRESH_SECRET = 'test_refresh_secret_at_least_32_chars_long_ok';
-process.env.APP_BASE_URL = 'http://localhost:8081';
+process.env.APP_BASE_URL = 'http://localhost:9091';
 process.env.WEB_BASE_URL = 'http://localhost:5173';
 process.env.LOG_LEVEL = 'error';
 
@@ -27,10 +27,16 @@ afterEach(async () => {
 });
 
 beforeEach(async () => {
-  // Platform colours are reference data every test relies on; reseed after the
-  // afterEach truncation so each test starts with the catalogue present.
+  // Guarantee a clean rate-limit slate at the START of every test, independent
+  // of hook ordering across files.
+  const { __resetRateLimit } = await import('../middlewares/rateLimit.middleware.js');
+  __resetRateLimit();
+  // Platform colours + materials are reference data every test relies on; reseed
+  // after the afterEach truncation so each test starts with the catalogue present.
   const { seedPlatformColors } = await import('../db/seed-colors.js');
+  const { seedPlatformMaterials } = await import('../db/seed-materials.js');
   await seedPlatformColors();
+  await seedPlatformMaterials();
 });
 
 afterAll(async () => {

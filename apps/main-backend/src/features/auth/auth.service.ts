@@ -1,6 +1,12 @@
 import bcrypt from 'bcryptjs';
 
-import { SellerSchema, slugify, type AuthResponse, type Seller } from '@shirtify/core';
+import {
+  SellerSchema,
+  slugify,
+  type AuthResponse,
+  type Seller,
+  type UpdateBrandBody,
+} from '@shirtify/core';
 
 import {
   signAccessToken,
@@ -12,18 +18,10 @@ import { getRepos } from '@repos/index.js';
 import type { SellerRecord } from '@repos/ports.js';
 
 /** Strip the password hash → the client-safe Seller shape. */
-const toSeller = (record: SellerRecord): Seller =>
-  SellerSchema.parse({
-    id: record.id,
-    email: record.email,
-    business_name: record.business_name,
-    public_slug: record.public_slug,
-    brand_logo_key: record.brand_logo_key,
-    brand_colors: record.brand_colors,
-    welcome_voice: record.welcome_voice,
-    role: record.role,
-    created_at: record.created_at,
-  });
+const toSeller = (record: SellerRecord): Seller => {
+  const { password_hash: _ignored, ...seller } = record;
+  return SellerSchema.parse(seller);
+};
 
 const issueTokens = (record: SellerRecord): AuthResponse => ({
   seller: toSeller(record),
@@ -100,6 +98,26 @@ export const refreshTokens = async (
 export const getSellerById = async (id: string): Promise<Seller> => {
   const repos = getRepos();
   const record = await repos.sellers.byId(id);
+  if (!record) throw new NotFoundError('Seller');
+  return toSeller(record);
+};
+
+export const updateBrand = async (
+  sellerId: string,
+  patch: UpdateBrandBody,
+): Promise<Seller> => {
+  const repos = getRepos();
+  // Build a defined-only patch (exactOptionalPropertyTypes-safe).
+  const update: Record<string, unknown> = {};
+  if (patch.business_name !== undefined) update.business_name = patch.business_name;
+  if (patch.description !== undefined) update.description = patch.description;
+  if (patch.welcome_voice !== undefined) update.welcome_voice = patch.welcome_voice;
+  if (patch.brand_logo_key !== undefined) update.brand_logo_key = patch.brand_logo_key;
+  if (patch.storefront_color !== undefined) update.storefront_color = patch.storefront_color;
+  if (patch.storefront_font !== undefined) update.storefront_font = patch.storefront_font;
+  if (patch.visible_materials !== undefined) update.visible_materials = patch.visible_materials;
+
+  const record = await repos.sellers.patchBrand(sellerId, update);
   if (!record) throw new NotFoundError('Seller');
   return toSeller(record);
 };

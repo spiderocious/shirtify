@@ -9,11 +9,20 @@ export const EP = {
   AUTH_REFRESH: 'api/v1/auth/refresh',
   AUTH_LOGOUT: 'api/v1/auth/logout',
   AUTH_ME: 'api/v1/me',
+  ME_BRAND: 'api/v1/me/brand',
 
   // Sessions (seller, auth)
   SESSIONS: 'api/v1/sessions',
   SESSION: (id: string) => `api/v1/sessions/${id}`,
   SESSION_EXPORT: (id: string) => `api/v1/sessions/${id}/export`,
+
+  // Colours (seller, auth)
+  COLORS: 'api/v1/colors',
+  COLOR: (id: string) => `api/v1/colors/${id}`,
+
+  // Materials (seller, auth)
+  MATERIALS: 'api/v1/materials',
+  MATERIAL: (id: string) => `api/v1/materials/${id}`,
 
   // Public design surface (token = key)
   PUBLIC_SESSION: (token: string) => `api/v1/c/${token}`,

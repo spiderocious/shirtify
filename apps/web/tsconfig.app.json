@@ -20,6 +20,8 @@
       "@shirtify/core/*": ["../../packages/core/src/*"],
       "@shirtify/api": ["../../packages/api/src/index.ts"],
       "@shirtify/api/*": ["../../packages/api/src/*"],
+      "@shirtify/canvas": ["../../packages/canvas/src/index.ts"],
+      "@shirtify/canvas/*": ["../../packages/canvas/src/*"],
       "@icons": ["../../packages/ui/src/icons/index.ts"]
     }
   },

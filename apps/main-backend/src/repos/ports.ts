@@ -4,6 +4,7 @@ import type {
   Design,
   Asset,
   Color,
+  Material,
   Scene,
   SessionKind,
   SessionStatus,
@@ -38,7 +39,22 @@ export interface SellerRepo {
   byEmail(email: string): Promise<SellerRecord | null>;
   bySlug(slug: string): Promise<SellerRecord | null>;
   slugExists(slug: string): Promise<boolean>;
-  patchBrand(id: string, patch: Partial<Pick<Seller, 'brand_logo_key' | 'brand_colors' | 'welcome_voice' | 'business_name'>>): Promise<SellerRecord | null>;
+  patchBrand(
+    id: string,
+    patch: Partial<
+      Pick<
+        Seller,
+        | 'brand_logo_key'
+        | 'brand_colors'
+        | 'welcome_voice'
+        | 'business_name'
+        | 'description'
+        | 'storefront_color'
+        | 'storefront_font'
+        | 'visible_materials'
+      >
+    >,
+  ): Promise<SellerRecord | null>;
 }
 
 export interface NewSession {
@@ -48,6 +64,7 @@ export interface NewSession {
   customer_name?: string;
   shirt_type: Session['shirt_type'];
   shirt_color: string;
+  material_slug?: string;
   allowed_colors?: string[];
   price_quoted?: number;
   notes?: string;
@@ -66,7 +83,12 @@ export interface SessionRepo {
   tokenExists(token: string): Promise<boolean>;
   listBySeller(sellerId: string, q: SessionListQuery): Promise<PaginatedResult<Session>>;
   setStatus(id: string, status: SessionStatus, submittedAt?: string): Promise<Session | null>;
-  patch(id: string, patch: Partial<Pick<Session, 'customer_name' | 'status'>>): Promise<Session | null>;
+  patch(
+    id: string,
+    patch: Partial<
+      Pick<Session, 'customer_name' | 'status' | 'shirt_type' | 'shirt_color' | 'material_slug'>
+    >,
+  ): Promise<Session | null>;
   touchActivity(id: string): Promise<void>;
 }
 
@@ -133,6 +155,26 @@ export interface ColorRepo {
   ensurePlatform(input: Omit<NewColor, 'scope' | 'seller_id'>): Promise<void>;
 }
 
+export interface NewMaterial {
+  scope: 'platform' | 'seller';
+  seller_id?: string;
+  slug: string;
+  label: string;
+  image_key?: string;
+  builtin_shape?: string;
+}
+
+export interface MaterialRepo {
+  /** Platform materials + the seller's own. */
+  listForSeller(sellerId: string): Promise<Material[]>;
+  listPlatform(): Promise<Material[]>;
+  create(input: NewMaterial): Promise<Material>;
+  bySellerAndId(sellerId: string, id: string): Promise<Material | null>;
+  remove(id: string): Promise<void>;
+  /** Idempotent seed helper: insert a platform material only if its slug is free. */
+  ensurePlatform(input: Omit<NewMaterial, 'scope' | 'seller_id'>): Promise<void>;
+}
+
 export interface IdempotencyRepo {
   /** Returns the stored result id for a prior (seller, operation, key), or null. */
   lookup(sellerId: string, operation: string, key: string): Promise<string | null>;
@@ -147,6 +189,7 @@ export interface Repositories {
   designs: DesignRepo;
   assets: AssetRepo;
   colors: ColorRepo;
+  materials: MaterialRepo;
   idempotency: IdempotencyRepo;
   pushSubscriptions: PushSubscriptionRepo;
 }

@@ -4,11 +4,13 @@ import {
   DesignSchema,
   AssetSchema,
   ColorSchema,
+  MaterialSchema,
   type Seller,
   type Session,
   type Design,
   type Asset,
   type Color,
+  type Material,
 } from '@shirtify/core';
 
 import type { SellerDoc } from '@db/models/seller.model.js';
@@ -16,6 +18,7 @@ import type { SessionDoc } from '@db/models/session.model.js';
 import type { DesignDoc } from '@db/models/design.model.js';
 import type { AssetDoc } from '@db/models/asset.model.js';
 import type { ColorDoc } from '@db/models/color.model.js';
+import type { MaterialDoc } from '@db/models/material.model.js';
 import type { SellerRecord } from '@repos/ports.js';
 
 /**
@@ -37,6 +40,10 @@ export const toSellerRecord = (doc: SellerDoc): SellerRecord => {
     brand_logo_key: doc.brand_logo_key ?? null,
     brand_colors: doc.brand_colors ?? null,
     welcome_voice: doc.welcome_voice ?? null,
+    description: doc.description ?? null,
+    storefront_color: doc.storefront_color ?? null,
+    storefront_font: doc.storefront_font ?? null,
+    visible_materials: doc.visible_materials ?? null,
     role: doc.role,
     created_at: iso(doc.created_at) ?? new Date().toISOString(),
   });
@@ -52,6 +59,7 @@ export const toSession = (doc: SessionDoc): Session =>
     customer_name: doc.customer_name ?? null,
     shirt_type: doc.shirt_type,
     shirt_color: doc.shirt_color,
+    material_slug: doc.material_slug ?? null,
     allowed_colors: doc.allowed_colors ?? null,
     price_quoted: doc.price_quoted ?? null,
     notes: doc.notes ?? null,
@@ -93,5 +101,17 @@ export const toColor = (doc: ColorDoc): Color =>
     slug: doc.slug,
     label: doc.label,
     hex: doc.hex,
+    created_at: iso(doc.created_at) ?? new Date().toISOString(),
+  });
+
+export const toMaterial = (doc: MaterialDoc): Material =>
+  MaterialSchema.parse({
+    id: doc._id.toString(),
+    scope: doc.scope,
+    seller_id: doc.seller_id ? doc.seller_id.toString() : null,
+    slug: doc.slug,
+    label: doc.label,
+    image_key: doc.image_key ?? null,
+    builtin_shape: doc.builtin_shape ?? null,
     created_at: iso(doc.created_at) ?? new Date().toISOString(),
   });

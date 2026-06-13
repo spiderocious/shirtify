@@ -15,6 +15,7 @@ export const createMongoSessionRepo = (): SessionRepo => ({
       customer_name: input.customer_name ?? null,
       shirt_type: input.shirt_type,
       shirt_color: input.shirt_color,
+      material_slug: input.material_slug ?? null,
       allowed_colors: input.allowed_colors ?? null,
       price_quoted: input.price_quoted ?? null,
       notes: input.notes ?? null,
@@ -74,7 +75,9 @@ export const createMongoSessionRepo = (): SessionRepo => ({
 
   async patch(
     id: string,
-    patch: Partial<Pick<Session, 'customer_name' | 'status'>>,
+    patch: Partial<
+      Pick<Session, 'customer_name' | 'status' | 'shirt_type' | 'shirt_color' | 'material_slug'>
+    >,
   ): Promise<Session | null> {
     const doc = await SessionModel.findByIdAndUpdate(id, patch, { new: true });
     return doc ? toSession(doc) : null;

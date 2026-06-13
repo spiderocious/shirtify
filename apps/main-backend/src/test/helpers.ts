@@ -29,6 +29,9 @@ export const seedSeller = async (overrides?: {
     .post('/api/v1/auth/register')
     .send({ email, business_name: business, password: 'Password123!' });
 
+  if (res.status !== 201) {
+    throw new Error(`seedSeller register failed: ${res.status} ${JSON.stringify(res.body)}`);
+  }
   const { seller, access_token, refresh_token } = res.body.data;
   return {
     token: access_token,

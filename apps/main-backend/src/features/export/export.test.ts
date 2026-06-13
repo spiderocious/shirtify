@@ -97,4 +97,39 @@ describe('export', () => {
       .send({ side: 'front' });
     expect(res.status).toBe(400);
   });
+
+  it('renders a v2 scene (shapes, gradient text, scene filter) without error', async () => {
+    const seller = await seedSeller();
+    const created = await api()
+      .post('/api/v1/sessions')
+      .set(...bearer(seller.token))
+      .send({ shirt_type: 'tee', shirt_color: 'white' });
+    const sessionToken = created.body.data.session.token as string;
+
+    const scene = emptyScene('tee', 'white');
+    scene.filter = 'grayscale';
+    scene.layers.push({
+      id: 'sh1', kind: 'shape', shape: 'heart', x: 0.5, y: 0.4, scale: 1, rotation: 0,
+      opacity: 1, fill: { type: 'linear', stops: [
+        { offset: 0, color: '#ff0000' }, { offset: 1, color: '#990000' },
+      ], angle: 90 }, size: 0.3,
+    });
+    scene.layers.push({
+      id: 'tx1', kind: 'text', x: 0.5, y: 0.7, scale: 1, rotation: 0, opacity: 1,
+      text: 'OMBRE', font: 'anton', color: { type: 'linear', stops: [
+        { offset: 0, color: '#00ffcc' }, { offset: 1, color: '#0044ff' },
+      ], angle: 0 },
+    });
+    await api()
+      .put(`/api/v1/c/${sessionToken}/design`)
+      .send({ canvas_front: scene, canvas_back: emptyScene('tee', 'white') });
+
+    const id = created.body.data.session.id as string;
+    const res = await api()
+      .post(`/api/v1/sessions/${id}/export`)
+      .set(...bearer(seller.token))
+      .send({ preset: 'web', side: 'front' });
+    expect(res.status).toBe(200);
+    expect(res.body.data.key).toBeTruthy();
+  });
 });

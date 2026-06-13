@@ -1,3 +1,4 @@
+import { ToastHost, BannerHost, ModalHost } from '@shirtify/ui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { type ReactNode, useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
@@ -13,7 +14,12 @@ export function AppProviders({ children }: { children: ReactNode }) {
   );
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>{children}</BrowserRouter>
+      <BrowserRouter>
+        {children}
+        <ToastHost />
+        <BannerHost />
+        <ModalHost />
+      </BrowserRouter>
     </QueryClientProvider>
   );
 }

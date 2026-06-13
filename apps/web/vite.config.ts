@@ -18,6 +18,10 @@ export default defineConfig({
         find: '@shirtify/ui/styles.css',
         replacement: path.resolve(__dirname, '../../packages/ui/src/styles.css'),
       },
+      {
+        find: '@shirtify/ui/flow',
+        replacement: path.resolve(__dirname, '../../packages/ui/src/flow.ts'),
+      },
       { find: /^@shirtify\/ui$/, replacement: path.resolve(__dirname, '../../packages/ui/src/index.ts') },
       {
         find: /^@shirtify\/core$/,
@@ -26,6 +30,10 @@ export default defineConfig({
       {
         find: /^@shirtify\/api$/,
         replacement: path.resolve(__dirname, '../../packages/api/src/index.ts'),
+      },
+      {
+        find: /^@shirtify\/canvas$/,
+        replacement: path.resolve(__dirname, '../../packages/canvas/src/index.ts'),
       },
       {
         find: /^@icons$/,

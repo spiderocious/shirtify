@@ -6,6 +6,7 @@ export type {
   SellerRole,
   BrandColors,
   PublicBrand,
+  StorefrontConfig,
   Session,
   SessionKind,
   SessionStatus,
@@ -13,6 +14,10 @@ export type {
   Design,
   Asset,
   AssetKind,
+  Color,
+  ColorScope,
+  Material,
+  MaterialScope,
 } from '../schemas/domain.js';
 
 export type {
@@ -21,6 +26,11 @@ export type {
   Layer,
   TextLayer,
   ImageLayer,
+  ShapeLayer,
+  ShapeKind,
+  Gradient,
+  Fill,
+  FilterKind,
   ShirtType,
 } from '../schemas/scene.js';
 

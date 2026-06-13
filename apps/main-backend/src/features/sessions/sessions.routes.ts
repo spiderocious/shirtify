@@ -12,6 +12,7 @@ import {
   listSessions,
   getSessionDetail,
   archiveSession,
+  editSession,
 } from './sessions.service.js';
 
 const router: IRouter = Router();
@@ -57,13 +58,27 @@ router.patch(
   '/:id',
   asyncHandler(async (req, res) => {
     const id = requireParam(req, 'id');
+    const sellerId = currentSellerId();
     const body = PatchSessionBody.parse(req.body);
+
     if (body.status === 'archived') {
-      const session = await archiveSession(currentSellerId(), id);
+      const session = await archiveSession(sellerId, id);
       return ResponseUtil.ok(res, { session });
     }
-    // No-op patch: return current detail's session.
-    const detail = await getSessionDetail(currentSellerId(), id);
+
+    // Edit shirt type / colour / material / customer name.
+    const edits = {
+      ...(body.shirt_type !== undefined && { shirt_type: body.shirt_type }),
+      ...(body.shirt_color !== undefined && { shirt_color: body.shirt_color }),
+      ...(body.material_slug !== undefined && { material_slug: body.material_slug }),
+      ...(body.customer_name !== undefined && { customer_name: body.customer_name }),
+    };
+    if (Object.keys(edits).length > 0) {
+      const session = await editSession(sellerId, id, edits);
+      return ResponseUtil.ok(res, { session });
+    }
+
+    const detail = await getSessionDetail(sellerId, id);
     return ResponseUtil.ok(res, { session: detail.session });
   }),
 );

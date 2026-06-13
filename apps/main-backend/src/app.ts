@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import { register as registerAuth } from '@features/auth/index.js';
 import { register as registerColors } from '@features/colors/index.js';
 import { register as registerHealth } from '@features/health/index.js';
+import { register as registerMaterials } from '@features/materials/index.js';
 import { register as registerNotifications } from '@features/notifications/index.js';
 import { register as registerPublic } from '@features/public/index.js';
 import { register as registerSessions } from '@features/sessions/index.js';
@@ -14,13 +15,12 @@ import { errorHandler } from '@middlewares/errorHandler.middleware.js';
 import { requestIdMiddleware } from '@middlewares/requestId.middleware.js';
 import { requestLogMiddleware } from '@middlewares/requestLog.middleware.js';
 
-import { env } from './env.js';
-
 // Order matters: specific/auth'd routes before the public token/slug surfaces.
 const features = [
   registerHealth,
   registerAuth,
   registerColors,
+  registerMaterials,
   registerNotifications,
   registerSessions,
   registerStorefront,
@@ -35,7 +35,7 @@ export const buildApp = (): express.Express => {
   app.use(helmet());
   app.use(
     cors({
-      origin: env.WEB_BASE_URL === '*' ? true : env.WEB_BASE_URL,
+      origin: "*",
       credentials: true,
     }),
   );

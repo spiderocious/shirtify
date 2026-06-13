@@ -1,6 +1,5 @@
 import {
   PublicSessionSchema,
-  PublicBrandSchema,
   SceneSchema,
   type Scene,
   type Design,
@@ -13,16 +12,7 @@ import {
 
 import { NotFoundError, ConflictError } from '@lib/errors.js';
 import { getRepos } from '@repos/index.js';
-import type { SellerRecord } from '@repos/ports.js';
-
-const toPublicBrand = (seller: SellerRecord): PublicBrand =>
-  PublicBrandSchema.parse({
-    business_name: seller.business_name,
-    public_slug: seller.public_slug,
-    brand_logo_key: seller.brand_logo_key,
-    brand_colors: seller.brand_colors,
-    welcome_voice: seller.welcome_voice,
-  });
+import { toPublicBrand } from '@shared/brand.js';
 
 const toPublicSession = (session: Session): PublicSession =>
   PublicSessionSchema.parse({
@@ -32,6 +22,7 @@ const toPublicSession = (session: Session): PublicSession =>
     customer_name: session.customer_name,
     shirt_type: session.shirt_type,
     shirt_color: session.shirt_color,
+    material_slug: session.material_slug,
     allowed_colors: session.allowed_colors,
     status: session.status,
   });

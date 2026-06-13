@@ -17,7 +17,7 @@ export function AdminHome() {
 
       <section className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Tile label="users" value="—" hint="connect once auth lands" />
-        <Tile label="items" value="—" hint="connect to /api/v1/example" />
+        <Tile label="items" value="—" hint="connect to a real source" />
         <Tile
           label="backend"
           value={isLoading ? '…' : isError ? 'down' : (data?.status ?? '—')}
