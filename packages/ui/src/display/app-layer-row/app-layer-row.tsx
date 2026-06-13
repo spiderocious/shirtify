@@ -11,7 +11,7 @@ import { cn } from '../../utils/cn.ts';
  * action. The selected row fills lime and lifts onto its shadow. Drag props
  * (draggable, onDragStart/Over/Drop) pass through for reorder-by-drag.
  */
-export type AppLayerKind = 'text' | 'image' | 'shape' | 'ai';
+export type AppLayerKind = 'text' | 'image' | 'shape' | 'graphic' | 'ai';
 
 export interface AppLayerRowProps extends HTMLAttributes<HTMLDivElement> {
   readonly kind: AppLayerKind;
@@ -26,8 +26,11 @@ const THUMB: Record<AppLayerKind, { className: string; glyph: string }> = {
   text: { className: 'bg-paper-warm text-ink', glyph: 'T' },
   image: { className: 'bg-blue text-white', glyph: '⬚' },
   shape: { className: 'bg-lime text-lime-ink', glyph: '◆' },
+  graphic: { className: 'bg-lime text-lime-ink', glyph: '✦' },
   ai: { className: 'bg-blue text-white', glyph: '✦' },
 };
+
+const FALLBACK_THUMB = { className: 'bg-paper-warm text-ink', glyph: '?' };
 
 export function AppLayerRow({
   kind,
@@ -39,7 +42,7 @@ export function AppLayerRow({
   className,
   ...rest
 }: AppLayerRowProps) {
-  const thumb = THUMB[kind];
+  const thumb = THUMB[kind] ?? FALLBACK_THUMB;
   return (
     <div
       onClick={onSelect}

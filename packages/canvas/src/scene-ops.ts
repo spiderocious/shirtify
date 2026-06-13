@@ -5,6 +5,8 @@ import {
   type ImageLayer,
   type ShapeLayer,
   type ShapeKind,
+  type GraphicLayer,
+  type GraphicNode,
   type Layer,
 } from '@shirtify/core';
 
@@ -60,6 +62,39 @@ export const addShapeLayer = (
     shape,
     fill,
     size: 0.25,
+  };
+  return { scene: { ...scene, layers: [...scene.layers, layer] }, layerId: layer.id };
+};
+
+/** Add a lucide icon as a graphic layer. */
+export const addGraphicLayer = (
+  scene: Scene,
+  icon: { iconId: string; nodes: GraphicNode[]; viewBox: number },
+  color = '#16140F',
+): { scene: Scene; layerId: string } => {
+  const layer: GraphicLayer = {
+    ...baseLayer(),
+    kind: 'graphic',
+    iconId: icon.iconId,
+    nodes: icon.nodes,
+    viewBox: icon.viewBox,
+    color,
+    strokeMode: true,
+    strokeWidth: 2,
+    size: 0.3,
+  };
+  return { scene: { ...scene, layers: [...scene.layers, layer] }, layerId: layer.id };
+};
+
+/** Add an emoji as a text layer (native glyph). */
+export const addEmojiLayer = (scene: Scene, emoji: string): { scene: Scene; layerId: string } => {
+  const layer: TextLayer = {
+    ...baseLayer(),
+    kind: 'text',
+    text: emoji,
+    font: 'inter',
+    color: '#16140F',
+    scale: 2,
   };
   return { scene: { ...scene, layers: [...scene.layers, layer] }, layerId: layer.id };
 };

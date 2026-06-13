@@ -4,12 +4,13 @@ import { Show } from '@shirtify/ui/flow';
 import { useDesign } from '../../providers/design-provider.tsx';
 import { ColourTool } from './colour-tool.tsx';
 import { FiltersTool } from './filters-tool.tsx';
+import { GraphicsTool } from './graphics-tool.tsx';
 import { ImageTool } from './image-tool.tsx';
 import { ShapesTool } from './shapes-tool.tsx';
 import { TextEditor } from './text-editor.tsx';
 import { LayerPanel } from './layer-panel.tsx';
 
-export type ToolId = 'text' | 'image' | 'shapes' | 'filters' | 'colour' | null;
+export type ToolId = 'text' | 'image' | 'graphics' | 'shapes' | 'filters' | 'colour' | null;
 
 /**
  * The right rail content. Priority: a selected text layer shows its editor;
@@ -39,6 +40,9 @@ export function ToolPanel({ tool }: { tool: ToolId }) {
       </Show>
       <Show when={tool === 'image'}>
         <ImageTool />
+      </Show>
+      <Show when={tool === 'graphics'}>
+        <GraphicsTool />
       </Show>
       <Show when={tool === 'shapes'}>
         <ShapesTool />

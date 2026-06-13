@@ -21,6 +21,9 @@ export type {
   Material,
   MaterialScope,
   StorefrontItem,
+  StorefrontTheme,
+  HeroStyle,
+  StorefrontLayout,
 } from '../schemas/domain.js';
 
 export type {
@@ -30,6 +33,8 @@ export type {
   TextLayer,
   ImageLayer,
   ShapeLayer,
+  GraphicLayer,
+  GraphicNode,
   ShapeKind,
   Gradient,
   Fill,

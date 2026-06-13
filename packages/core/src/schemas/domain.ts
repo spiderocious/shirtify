@@ -75,6 +75,34 @@ export const MaterialSchema = z.object({
 });
 export type Material = z.infer<typeof MaterialSchema>;
 
+export const HeroStyle = z.enum(['centered', 'banner', 'minimal']);
+export type HeroStyle = z.infer<typeof HeroStyle>;
+
+export const StorefrontLayout = z.enum(['grid', 'compact', 'feature']);
+export type StorefrontLayout = z.infer<typeof StorefrontLayout>;
+
+/**
+ * Expanded storefront presentation theme (set by the seller). Stored as one JSON
+ * object so adding knobs doesn't mean new columns. The page keeps the Shirtify
+ * neobrutalist frame; these values recolour/restructure it.
+ */
+export const StorefrontTheme = z.object({
+  bg_color: z.string().nullable().default(null),
+  text_color: z.string().nullable().default(null),
+  headline: z.string().nullable().default(null),
+  tagline: z.string().nullable().default(null),
+  hero_style: HeroStyle.default('centered'),
+  footer_enabled: z.boolean().default(false),
+  footer_text: z.string().nullable().default(null),
+  layout: StorefrontLayout.default('grid'),
+  columns: z.number().int().min(2).max(5).default(4),
+  show_labels: z.boolean().default(true),
+});
+export type StorefrontTheme = z.infer<typeof StorefrontTheme>;
+
+/** Sensible defaults for a seller who hasn't customised. */
+export const defaultStorefrontTheme = (): StorefrontTheme => StorefrontTheme.parse({});
+
 /** Storefront presentation config, set by the seller. */
 export const StorefrontConfig = z.object({
   description: z.string().nullable(),
@@ -99,6 +127,7 @@ export const SellerSchema = z.object({
   description: z.string().nullable(),
   storefront_color: z.string().nullable(),
   storefront_font: z.string().nullable(),
+  storefront_theme: StorefrontTheme.nullable(),
   visible_materials: z.array(z.string()).nullable(),
   registration_status: RegistrationStatus,
   role: SellerRole,
@@ -116,6 +145,7 @@ export const PublicBrandSchema = z.object({
   description: z.string().nullable(),
   storefront_color: z.string().nullable(),
   storefront_font: z.string().nullable(),
+  storefront_theme: StorefrontTheme.nullable(),
 });
 export type PublicBrand = z.infer<typeof PublicBrandSchema>;
 

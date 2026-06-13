@@ -3,7 +3,7 @@ import { useEffect, useImperativeHandle, useRef, useState, forwardRef } from 're
 import { Stage, Layer as KonvaLayer, Rect, Transformer } from 'react-konva';
 import type Konva from 'konva';
 
-import { ImageLayerNode, TextLayerNode, ShapeLayerNode } from './layer-nodes.tsx';
+import { ImageLayerNode, TextLayerNode, ShapeLayerNode, GraphicLayerNode } from './layer-nodes.tsx';
 import { MaterialBackdrop } from './material-backdrop.tsx';
 import { toKonvaFilters } from './filters.ts';
 import { useFontsReady } from './use-fonts-ready.ts';
@@ -175,6 +175,7 @@ export const DesignCanvas = forwardRef<CanvasHandle, DesignCanvasProps>(function
             };
             if (layer.kind === 'text') return <TextLayerNode key={layer.id} {...common} />;
             if (layer.kind === 'shape') return <ShapeLayerNode key={layer.id} {...common} />;
+            if (layer.kind === 'graphic') return <GraphicLayerNode key={layer.id} {...common} />;
             return <ImageLayerNode key={layer.id} {...common} />;
           })}
           {!readOnly ? (

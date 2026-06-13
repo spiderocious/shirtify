@@ -69,6 +69,9 @@ export const AppButton = forwardRef<HTMLButtonElement, AppButtonProps>(function 
     className,
     children,
     disabled,
+    // Default to "button" so a button inside a <form> never submits by accident.
+    // Submit buttons opt in explicitly with type="submit".
+    type = 'button',
     ...rest
   },
   ref,
@@ -76,6 +79,7 @@ export const AppButton = forwardRef<HTMLButtonElement, AppButtonProps>(function 
   return (
     <button
       ref={ref}
+      type={type}
       disabled={disabled === true || loading}
       className={cn(
         BASE,

@@ -116,6 +116,7 @@ export const updateBrand = async (
   if (patch.brand_logo_key !== undefined) update.brand_logo_key = patch.brand_logo_key;
   if (patch.storefront_color !== undefined) update.storefront_color = patch.storefront_color;
   if (patch.storefront_font !== undefined) update.storefront_font = patch.storefront_font;
+  if (patch.storefront_theme !== undefined) update.storefront_theme = patch.storefront_theme;
   if (patch.visible_materials !== undefined) update.visible_materials = patch.visible_materials;
 
   const record = await repos.sellers.patchBrand(sellerId, update);

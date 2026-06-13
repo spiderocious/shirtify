@@ -9,6 +9,7 @@ import {
   PublicBrandSchema,
   MaterialSchema,
   StorefrontItemSchema,
+  StorefrontTheme,
   SessionStatus,
 } from './domain.js';
 import { ShirtTypeSchema, SceneSchema } from './scene.js';
@@ -206,6 +207,7 @@ export const UpdateBrandBody = z.object({
   brand_logo_key: z.string().nullable().optional(),
   storefront_color: hex.nullable().optional(),
   storefront_font: z.string().nullable().optional(),
+  storefront_theme: StorefrontTheme.nullable().optional(),
   visible_materials: z.array(z.string()).nullable().optional(),
 });
 export type UpdateBrandBody = z.infer<typeof UpdateBrandBody>;

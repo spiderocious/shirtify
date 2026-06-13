@@ -7,6 +7,8 @@ import { useAuth } from '@features/sellers/auth/providers/auth-provider.tsx';
 import { MaterialsManager } from '@features/sellers/brand/screen/parts/materials-manager.tsx';
 import { ENV } from '@shared/config/env.ts';
 
+import { StorefrontThemeEditor } from './parts/storefront-theme-editor.tsx';
+
 /** Storefront management tab — what's shown publicly: materials + how to feature designs. */
 export default function StorefrontMgmtScreen() {
   const { seller } = useAuth();
@@ -40,6 +42,9 @@ export default function StorefrontMgmtScreen() {
       <Show when={seller !== null} fallback={<AppSkeleton className="mt-8 h-64" />}>
         {seller ? (
           <div className="mt-8 flex flex-col gap-8">
+            <section className="border-3 border-ink bg-paper-warm p-6 shadow-pop">
+              <StorefrontThemeEditor seller={seller} />
+            </section>
             <section className="border-3 border-ink bg-paper-warm p-6 shadow-pop">
               <MaterialsManager seller={seller} />
             </section>

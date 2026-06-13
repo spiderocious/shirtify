@@ -51,6 +51,7 @@ export interface SellerRepo {
         | 'description'
         | 'storefront_color'
         | 'storefront_font'
+        | 'storefront_theme'
         | 'visible_materials'
         | 'registration_status'
       >

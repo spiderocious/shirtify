@@ -13,4 +13,5 @@ export const toPublicBrand = (seller: SellerRecord): PublicBrand =>
     description: seller.description,
     storefront_color: seller.storefront_color,
     storefront_font: seller.storefront_font,
+    storefront_theme: seller.storefront_theme,
   });

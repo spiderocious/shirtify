@@ -43,6 +43,7 @@ export const toSellerRecord = (doc: SellerDoc): SellerRecord => {
     description: doc.description ?? null,
     storefront_color: doc.storefront_color ?? null,
     storefront_font: doc.storefront_font ?? null,
+    storefront_theme: doc.storefront_theme ?? null,
     visible_materials: doc.visible_materials ?? null,
     registration_status: doc.registration_status ?? 'AWAITING_BUSINESS_SUBMISSION',
     role: doc.role,

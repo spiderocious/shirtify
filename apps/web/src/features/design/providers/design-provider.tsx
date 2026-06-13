@@ -2,6 +2,8 @@ import {
   addTextLayer as addText,
   addImageLayer as addImage,
   addShapeLayer as addShape,
+  addGraphicLayer as addGraphic,
+  addEmojiLayer as addEmoji,
   removeLayer as removeLayerOp,
   reorderLayer as reorderLayerOp,
   moveLayerToIndex as moveLayerToIndexOp,
@@ -14,6 +16,7 @@ import {
   type Layer,
   type ShapeKind,
   type FilterKind,
+  type GraphicNode,
   type DesignTemplate,
   type PublicSessionResponse,
 } from '@shirtify/core';
@@ -40,6 +43,8 @@ interface DesignContextValue {
   addTextLayer: (input?: NewTextLayerInput) => void;
   addImageLayer: (assetKey: string) => void;
   addShapeLayer: (shape: ShapeKind) => void;
+  addGraphicLayer: (icon: { iconId: string; nodes: GraphicNode[]; viewBox: number }) => void;
+  addEmojiLayer: (emoji: string) => void;
   removeLayer: (id: string) => void;
   reorderLayer: (id: string, direction: 1 | -1) => void;
   moveLayerToIndex: (id: string, index: number) => void;
@@ -129,6 +134,16 @@ export function DesignProvider({
     },
     addShapeLayer: (shape) => {
       const { scene, layerId } = addShape(latest.current[side], shape);
+      commit({ ...latest.current, [side]: scene });
+      setSelectedLayerId(layerId);
+    },
+    addGraphicLayer: (icon) => {
+      const { scene, layerId } = addGraphic(latest.current[side], icon);
+      commit({ ...latest.current, [side]: scene });
+      setSelectedLayerId(layerId);
+    },
+    addEmojiLayer: (emoji) => {
+      const { scene, layerId } = addEmoji(latest.current[side], emoji);
       commit({ ...latest.current, [side]: scene });
       setSelectedLayerId(layerId);
     },

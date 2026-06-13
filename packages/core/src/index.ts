@@ -22,6 +22,7 @@ export {
   TextLayerSchema,
   ImageLayerSchema,
   ShapeLayerSchema,
+  GraphicLayerSchema,
   GradientSchema,
   FillSchema,
   FilterSchema,
@@ -38,6 +39,7 @@ export type {
   FilterKind,
   ShapeKind,
   ShapeLayer,
+  GraphicLayer,
 } from './schemas/scene.js';
 
 // Domain schemas
@@ -45,6 +47,10 @@ export {
   SellerSchema,
   PublicBrandSchema,
   StorefrontConfig,
+  StorefrontTheme,
+  HeroStyle,
+  StorefrontLayout,
+  defaultStorefrontTheme,
   BrandColors,
   SellerRole,
   RegistrationStatus,
@@ -67,6 +73,12 @@ export type { Color, Material, StorefrontItem } from './schemas/domain.js';
 // Templates
 export { TEMPLATES, searchTemplates, applyTemplate } from './constants/templates.js';
 export type { DesignTemplate } from './constants/templates.js';
+
+// Graphics catalogue (lucide icons + emojis)
+export { ICONS, searchIcons } from './constants/icons.js';
+export type { IconDef } from './constants/icons.js';
+export { EMOJIS, searchEmojis } from './constants/emojis.js';
+export type { EmojiDef } from './constants/emojis.js';
 
 // API wire schemas
 export * from './schemas/api.js';

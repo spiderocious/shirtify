@@ -123,10 +123,39 @@ export const ShapeLayerSchema = BaseLayer.extend({
 });
 export type ShapeLayer = z.infer<typeof ShapeLayerSchema>;
 
+/**
+ * A vector icon layer — drawn from an icon set (lucide). Stored as the icon's
+ * list of SVG primitives ([tag, attrs] nodes, lucide's native shape) + the
+ * source viewBox, so it renders crisply + recolourable on the Konva canvas AND
+ * the server exporter with no hosted assets. lucide is stroke-based (monoline).
+ * (Emojis are NOT graphic layers — they're plain text layers.)
+ */
+export const GraphicNode = z.tuple([z.string(), z.record(z.union([z.string(), z.number()]))]);
+export type GraphicNode = z.infer<typeof GraphicNode>;
+
+export const GraphicLayerSchema = BaseLayer.extend({
+  kind: z.literal('graphic'),
+  /** Icon id (e.g. 'building-2'), for reference/search. */
+  iconId: z.string(),
+  /** SVG primitives: [tag, attrs][] (path/circle/line/rect/polyline/polygon). */
+  nodes: z.array(GraphicNode),
+  /** Source viewBox size (lucide = 24). Node coords are in this space. */
+  viewBox: z.number().positive().default(24),
+  /** Stroke colour (lucide is monoline) or a gradient. */
+  color: FillSchema,
+  /** lucide is monoline → stroke by default; set false to fill instead. */
+  strokeMode: z.boolean().default(true),
+  strokeWidth: z.number().min(0).default(2),
+  /** Base size as a fraction of the print area (before `scale`). */
+  size: z.number().positive().default(0.3),
+});
+export type GraphicLayer = z.infer<typeof GraphicLayerSchema>;
+
 export const LayerSchema = z.discriminatedUnion('kind', [
   TextLayerSchema,
   ImageLayerSchema,
   ShapeLayerSchema,
+  GraphicLayerSchema,
 ]);
 export type Layer = z.infer<typeof LayerSchema>;
 

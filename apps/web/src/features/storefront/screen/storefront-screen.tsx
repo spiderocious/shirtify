@@ -1,6 +1,13 @@
-import { ROUTES, fontFamilyById, type StorefrontItem, type StartSessionBody } from '@shirtify/core';
+import {
+  ROUTES,
+  fontFamilyById,
+  defaultStorefrontTheme,
+  type StorefrontItem,
+  type StartSessionBody,
+} from '@shirtify/core';
 import { AppText, AppSkeleton, AppEmptyState, DrawerService } from '@shirtify/ui';
 import { Show, Repeat } from '@shirtify/ui/flow';
+import { type CSSProperties } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { resolveAssetUrl } from '@shared/api/resolve-asset-url.ts';
@@ -66,33 +73,55 @@ export default function StorefrontScreen() {
     );
   }
 
+  const theme = data.brand.storefront_theme ?? defaultStorefrontTheme();
   const accent = data.brand.storefront_color ?? undefined;
   const headingFont = data.brand.storefront_font
     ? fontFamilyById(data.brand.storefront_font)
     : undefined;
+  const headline = theme.headline || data.brand.business_name;
+  const tagline = theme.tagline ?? data.brand.description ?? undefined;
+
+  const pageStyle: CSSProperties = {
+    ...(theme.bg_color ? { backgroundColor: theme.bg_color } : {}),
+    ...(theme.text_color ? { color: theme.text_color } : {}),
+  };
+  const headerStyle: CSSProperties =
+    theme.hero_style === 'banner' && accent
+      ? { backgroundColor: accent }
+      : accent && theme.hero_style !== 'minimal'
+        ? { backgroundColor: accent }
+        : {};
+  const align = theme.hero_style === 'minimal' ? 'text-left' : 'text-center';
+  // Column count → responsive grid classes (kept static so Tailwind keeps them).
+  const colClass =
+    { 2: 'sm:grid-cols-2', 3: 'sm:grid-cols-3', 4: 'sm:grid-cols-4', 5: 'sm:grid-cols-5' }[
+      theme.columns
+    ] ?? 'sm:grid-cols-4';
+  const baseCols = theme.layout === 'compact' ? 'grid-cols-3' : 'grid-cols-2';
 
   return (
-    <main className="min-h-dvh bg-paper">
+    <main className="min-h-dvh bg-paper" style={pageStyle}>
       {/* Immersive brand header */}
-      <header
-        className="border-b-3 border-ink px-6 py-12 text-center"
-        style={accent ? { backgroundColor: accent } : undefined}
-      >
-        <StorefrontLogo logoKey={data.brand.brand_logo_key} resolveAssetUrl={resolveAssetUrl} />
-        <h1
-          className="mt-4 font-display text-4xl tracking-tight text-ink sm:text-5xl"
-          style={headingFont ? { fontFamily: headingFont } : undefined}
-        >
-          {data.brand.business_name}
-        </h1>
-        <Show when={Boolean(data.brand.description)}>
-          <AppText variant="body" className="mx-auto mt-3 max-w-prose !text-ink">
-            {data.brand.description}
-          </AppText>
-        </Show>
+      <header className={`border-b-3 border-ink px-6 ${align} ${theme.hero_style === 'minimal' ? 'py-6' : 'py-12'}`} style={headerStyle}>
+        <div className={theme.hero_style === 'minimal' ? 'mx-auto flex max-w-5xl items-center gap-4' : ''}>
+          <StorefrontLogo logoKey={data.brand.brand_logo_key} resolveAssetUrl={resolveAssetUrl} />
+          <div>
+            <h1
+              className={`font-display tracking-tight ${theme.hero_style === 'minimal' ? 'text-2xl' : 'mt-4 text-4xl sm:text-5xl'}`}
+              style={headingFont ? { fontFamily: headingFont } : undefined}
+            >
+              {headline}
+            </h1>
+            <Show when={Boolean(tagline)}>
+              <p className={`mx-auto max-w-prose font-sans ${theme.hero_style === 'minimal' ? 'text-sm' : 'mt-3 text-base'}`}>
+                {tagline}
+              </p>
+            </Show>
+          </div>
+        </div>
       </header>
 
-      <section className="mx-auto max-w-5xl px-6 py-10">
+      <section className="mx-auto max-w-6xl px-6 py-10">
         <AppText variant="overline">Tap any design to make it your own</AppText>
         <Show
           when={data.items.length > 0}
@@ -105,12 +134,13 @@ export default function StorefrontScreen() {
             />
           }
         >
-          <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          <div className={`mt-4 grid gap-4 ${baseCols} ${colClass}`}>
             <Repeat each={[...data.items]}>
               {(item) => (
                 <StorefrontItemCard
                   key={item.kind === 'design' ? item.token : item.slug}
                   item={item}
+                  showLabel={theme.show_labels}
                   onPick={() => begin(item)}
                 />
               )}
@@ -119,7 +149,12 @@ export default function StorefrontScreen() {
         </Show>
       </section>
 
-      <footer className="border-t-3 border-ink px-6 py-6 text-center">
+      <Show when={theme.footer_enabled && Boolean(theme.footer_text)}>
+        <footer className="border-t-3 border-ink px-6 py-8 text-center" style={headerStyle}>
+          <p className="mx-auto max-w-prose font-sans text-sm">{theme.footer_text}</p>
+        </footer>
+      </Show>
+      <footer className="border-t-3 border-ink px-6 py-5 text-center">
         <AppText variant="mono" as="p" className="text-[10px]">
           {data.brand.business_name} · powered by Shirtify
         </AppText>

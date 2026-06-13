@@ -8,6 +8,7 @@ import { useDesign } from '../../providers/design-provider.tsx';
 const layerName = (layer: Layer): string => {
   if (layer.kind === 'text') return layer.text || 'Text';
   if (layer.kind === 'shape') return `${layer.shape} shape`;
+  if (layer.kind === 'graphic') return layer.iconId;
   return 'Image';
 };
 

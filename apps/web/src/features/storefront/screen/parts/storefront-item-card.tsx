@@ -1,16 +1,47 @@
 import { DesignCanvas } from '@shirtify/canvas';
 import { SHIRT_TYPE_LABELS, type StorefrontItem } from '@shirtify/core';
 import { AppText } from '@shirtify/ui';
+import { useEffect, useState } from 'react';
 
 import { resolveAssetUrl } from '@shared/api/resolve-asset-url.ts';
 
-/** One storefront card — a public design preview, or a bare material. */
+/** Resolves + shows a material's uploaded photo, or a garment glyph fallback. */
+function MaterialThumb({ imageKey, shape }: { imageKey: string | null; shape: string | null }) {
+  const [url, setUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!imageKey) {
+      setUrl(null);
+      return;
+    }
+    void resolveAssetUrl(imageKey).then((u) => {
+      if (!cancelled) setUrl(u);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [imageKey]);
+
+  if (url) {
+    return <img src={url} alt="" className="h-full w-full object-cover" />;
+  }
+  return (
+    <div className="flex h-full w-full items-center justify-center text-6xl text-ink-3">
+      {shape === 'hoodie' || shape === 'oversized' ? '🧥' : shape === 'polo' ? '🎽' : '👕'}
+    </div>
+  );
+}
+
+/** One storefront card — a public design preview, or a material (photo or glyph). */
 export function StorefrontItemCard({
   item,
   onPick,
+  showLabel = true,
 }: {
   item: StorefrontItem;
   onPick: () => void;
+  showLabel?: boolean;
 }) {
   return (
     <button
@@ -32,19 +63,19 @@ export function StorefrontItemCard({
             />
           </div>
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-6xl text-ink-3">
-            {item.builtin_shape === 'hoodie' ? '🧥' : '👕'}
-          </div>
+          <MaterialThumb imageKey={item.image_key} shape={item.builtin_shape} />
         )}
       </div>
-      <div className="flex items-center justify-between gap-2 px-3 py-2.5">
-        <AppText variant="body-sm" as="span" className="truncate font-bold !text-ink">
-          {item.label}
-        </AppText>
-        <span className="shrink-0 font-mono text-[9px] uppercase tracking-[0.08em] text-ink-3">
-          {item.kind === 'design' ? SHIRT_TYPE_LABELS[item.shirt_type] : 'blank'}
-        </span>
-      </div>
+      {showLabel ? (
+        <div className="flex items-center justify-between gap-2 px-3 py-2.5">
+          <AppText variant="body-sm" as="span" className="truncate font-bold !text-ink">
+            {item.label}
+          </AppText>
+          <span className="shrink-0 font-mono text-[9px] uppercase tracking-[0.08em] text-ink-3">
+            {item.kind === 'design' ? SHIRT_TYPE_LABELS[item.shirt_type] : 'blank'}
+          </span>
+        </div>
+      ) : null}
     </button>
   );
 }

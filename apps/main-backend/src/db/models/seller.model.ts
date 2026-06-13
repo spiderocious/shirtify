@@ -22,6 +22,7 @@ const sellerSchema = new Schema(
     description: { type: String, default: null },
     storefront_color: { type: String, default: null },
     storefront_font: { type: String, default: null },
+    storefront_theme: { type: Schema.Types.Mixed, default: null },
     visible_materials: { type: [String], default: null },
     registration_status: {
       type: String,

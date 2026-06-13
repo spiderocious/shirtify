@@ -1,4 +1,4 @@
-import { createCanvas, loadImage, type SKRSContext2D } from '@napi-rs/canvas';
+import { createCanvas, loadImage, Path2D, type SKRSContext2D } from '@napi-rs/canvas';
 
 import {
   fontFamilyById,
@@ -7,6 +7,7 @@ import {
   type Fill,
   type FilterKind,
   type ShapeKind,
+  type GraphicNode,
 } from '@shirtify/core';
 
 import { logger } from '@lib/logger.js';
@@ -188,6 +189,67 @@ const drawShapePath = (ctx: Ctx, shape: ShapeKind, size: number, sides = 6): voi
   }
 };
 
+// Draw one lucide [tag, attrs] primitive in the current (already-scaled) ctx.
+const gnum = (v: string | number | undefined, d = 0): number =>
+  typeof v === 'number' ? v : v !== undefined ? parseFloat(v) : d;
+
+const drawGraphicPrimitive = (
+  ctx: Ctx,
+  tag: string,
+  attrs: GraphicNode[1],
+  strokeMode: boolean,
+): void => {
+  const finish = () => (strokeMode ? ctx.stroke() : ctx.fill());
+  switch (tag) {
+    case 'path': {
+      const p = new Path2D(String(attrs.d ?? ''));
+      if (strokeMode) ctx.stroke(p);
+      else ctx.fill(p);
+      break;
+    }
+    case 'circle':
+      ctx.beginPath();
+      ctx.arc(gnum(attrs.cx), gnum(attrs.cy), gnum(attrs.r), 0, Math.PI * 2);
+      finish();
+      break;
+    case 'ellipse':
+      ctx.beginPath();
+      ctx.ellipse(gnum(attrs.cx), gnum(attrs.cy), gnum(attrs.rx), gnum(attrs.ry), 0, 0, Math.PI * 2);
+      finish();
+      break;
+    case 'rect':
+      ctx.beginPath();
+      ctx.roundRect(gnum(attrs.x), gnum(attrs.y), gnum(attrs.width), gnum(attrs.height), gnum(attrs.rx));
+      finish();
+      break;
+    case 'line':
+      ctx.beginPath();
+      ctx.moveTo(gnum(attrs.x1), gnum(attrs.y1));
+      ctx.lineTo(gnum(attrs.x2), gnum(attrs.y2));
+      ctx.stroke();
+      break;
+    case 'polyline':
+    case 'polygon': {
+      const pts = String(attrs.points ?? '')
+        .trim()
+        .split(/[\s,]+/)
+        .map(Number);
+      ctx.beginPath();
+      for (let i = 0; i < pts.length; i += 2) {
+        const x = pts[i] ?? 0;
+        const y = pts[i + 1] ?? 0;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      if (tag === 'polygon') ctx.closePath();
+      finish();
+      break;
+    }
+    default:
+      break;
+  }
+};
+
 const drawLayer = async (
   ctx: Ctx,
   layer: Layer,
@@ -225,6 +287,28 @@ const drawLayer = async (
       ctx.strokeStyle = layer.stroke.color;
       ctx.lineWidth = layer.stroke.width;
       ctx.stroke();
+    }
+  } else if (layer.kind === 'graphic') {
+    // lucide icon: scale its 24-viewBox nodes into the layer box, draw each
+    // primitive as stroke (monoline) or fill, matching the canvas.
+    const box = (layer.size ?? 0.3) * target.width;
+    const vb = layer.viewBox || 24;
+    const gs = box / vb;
+    ctx.translate(-box / 2, -box / 2);
+    ctx.scale(gs, gs);
+    const paint = layer.strokeMode
+      ? (() => {
+          ctx.strokeStyle = typeof layer.color === 'string' ? layer.color : '#16140F';
+          ctx.lineWidth = layer.strokeWidth || 2;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+        })
+      : (() => {
+          ctx.fillStyle = applyFill(ctx, layer.color, vb, vb);
+        });
+    paint();
+    for (const [tag, attrs] of layer.nodes) {
+      drawGraphicPrimitive(ctx, tag, attrs, layer.strokeMode);
     }
   } else {
     try {

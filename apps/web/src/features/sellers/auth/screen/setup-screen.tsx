@@ -1,4 +1,4 @@
-import { ROUTES, type SubmitBusinessBody } from '@shirtify/core';
+import { ROUTES, type SubmitBusinessBody } from "@shirtify/core";
 import {
   AppText,
   AppField,
@@ -7,19 +7,27 @@ import {
   AppButton,
   AppColourSwatches,
   DrawerService,
-} from '@shirtify/ui';
-import { Show } from '@shirtify/ui/flow';
-import { type FormEvent, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+} from "@shirtify/ui";
+import { Show } from "@shirtify/ui/flow";
+import { type FormEvent, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-import { toApiError } from '@shared/api/api-error.ts';
+import { toApiError } from "@shared/api/api-error.ts";
 
-import { useSubmitBusiness } from '../api/use-submit-business.ts';
-import { useLogout } from '../api/use-logout.ts';
-import { FontControl } from '../../../design/widgets/font-picker-modal.tsx';
-import { LogoUpload } from './parts/logo-upload.tsx';
+import { useSubmitBusiness } from "../api/use-submit-business.ts";
+import { useLogout } from "../api/use-logout.ts";
+import { FontControl } from "../../../design/widgets/font-picker-modal.tsx";
+import { LogoUpload } from "./parts/logo-upload.tsx";
 
-const COLORS = ['#1F6BFF', '#C6F24E', '#FF5252', '#ea580c', '#9333ea', '#0d9488', '#16140F'];
+const COLORS = [
+  "#1F6BFF",
+  "#C6F24E",
+  "#FF5252",
+  "#ea580c",
+  "#9333ea",
+  "#0d9488",
+  "#16140F",
+];
 
 /** Unskippable store-setup page (registration stage 2). */
 export default function SetupScreen() {
@@ -27,10 +35,10 @@ export default function SetupScreen() {
   const submit = useSubmitBusiness();
   const logout = useLogout();
 
-  const [businessName, setBusinessName] = useState('');
-  const [description, setDescription] = useState('');
-  const [color, setColor] = useState('#1F6BFF');
-  const [font, setFont] = useState('archivo-black');
+  const [businessName, setBusinessName] = useState("");
+  const [description, setDescription] = useState("");
+  const [color, setColor] = useState("#1F6BFF");
+  const [font, setFont] = useState("archivo-black");
   const [logoKey, setLogoKey] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
@@ -50,7 +58,8 @@ export default function SetupScreen() {
     } catch (err) {
       const apiError = await toApiError(err);
       setFieldErrors(apiError.field_errors ?? {});
-      if (!apiError.field_errors) DrawerService.toast(apiError.message, { tone: 'warn' });
+      if (!apiError.field_errors)
+        DrawerService.toast(apiError.message, { tone: "warn" });
     }
   };
 
@@ -63,16 +72,23 @@ export default function SetupScreen() {
             Tell us about your shop
           </AppText>
           <AppText variant="body-sm" className="mt-2">
-            This is how customers will see your storefront. You can change it later.
+            This is how customers will see your storefront. You can change it
+            later.
           </AppText>
         </div>
 
-        <form onSubmit={onSubmit} className="flex flex-col gap-5 border-3 border-ink bg-paper-warm p-6 shadow-pop">
+        <form
+          onSubmit={onSubmit}
+          className="flex flex-col gap-5 border-3 border-ink bg-paper-warm p-6 shadow-pop"
+        >
           <AppField label="Logo">
             <LogoUpload value={logoKey} onChange={setLogoKey} />
           </AppField>
 
-          <AppField label="Business name" error={fieldErrors.business_name?.[0]}>
+          <AppField
+            label="Business name"
+            error={fieldErrors.business_name?.[0]}
+          >
             <AppInput
               value={businessName}
               onChange={(e) => setBusinessName(e.target.value)}
@@ -81,7 +97,10 @@ export default function SetupScreen() {
             />
           </AppField>
 
-          <AppField label="Description" hint="A line customers see on your storefront.">
+          <AppField
+            label="Description"
+            hint="A line customers see on your storefront."
+          >
             <AppTextarea
               rows={2}
               value={description}
@@ -91,7 +110,11 @@ export default function SetupScreen() {
           </AppField>
 
           <AppField label="Storefront accent colour">
-            <AppColourSwatches colours={COLORS} value={color} onChange={setColor} />
+            <AppColourSwatches
+              colours={COLORS}
+              value={color}
+              onChange={setColor}
+            />
           </AppField>
 
           <AppField label="Storefront font">
@@ -99,10 +122,18 @@ export default function SetupScreen() {
           </AppField>
 
           <Show when={fieldErrors._root !== undefined}>
-            <p className="font-mono text-[11px] text-crit">{fieldErrors._root?.[0]}</p>
+            <p className="font-mono text-[11px] text-crit">
+              {fieldErrors._root?.[0]}
+            </p>
           </Show>
 
-          <AppButton type="submit" variant="primary" block size="lg" loading={submit.isPending}>
+          <AppButton
+            type="submit"
+            variant="primary"
+            block
+            size="lg"
+            loading={submit.isPending}
+          >
             Finish setup →
           </AppButton>
         </form>
@@ -110,7 +141,9 @@ export default function SetupScreen() {
         <div className="mt-4 text-center">
           <button
             type="button"
-            onClick={() => logout.mutateAsync().then(() => navigate(ROUTES.LOGIN))}
+            onClick={() =>
+              logout.mutateAsync().then(() => navigate(ROUTES.LOGIN))
+            }
             className="font-mono text-[11px] text-ink-3 underline"
           >
             Log out

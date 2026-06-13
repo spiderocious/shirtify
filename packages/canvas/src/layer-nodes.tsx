@@ -1,6 +1,24 @@
-import { fontFamilyById, type Layer, type TextLayer, type ImageLayer, type ShapeLayer } from '@shirtify/core';
+import {
+  fontFamilyById,
+  type Layer,
+  type TextLayer,
+  type ImageLayer,
+  type ShapeLayer,
+  type GraphicLayer,
+} from '@shirtify/core';
 import { forwardRef, useEffect, useRef, useMemo } from 'react';
-import { Text as KonvaText, Image as KonvaImage, Path, Rect, Circle, Ellipse, RegularPolygon, Star, Line } from 'react-konva';
+import {
+  Text as KonvaText,
+  Image as KonvaImage,
+  Path,
+  Rect,
+  Circle,
+  Ellipse,
+  RegularPolygon,
+  Star,
+  Line,
+  Group,
+} from 'react-konva';
 import type Konva from 'konva';
 
 import { toKonvaFill } from './fill.ts';
@@ -217,4 +235,109 @@ export const ShapeLayerNode = forwardRef<Konva.Node, LayerNodeProps>(function Sh
     default:
       return <RegularPolygon ref={ref as never} sides={shape.sides ?? 6} radius={r} {...common} />;
   }
+});
+
+// ---- Graphic (lucide icon) ----
+const num = (v: string | number | undefined, d = 0): number =>
+  typeof v === 'number' ? v : v !== undefined ? parseFloat(v) : d;
+
+/** Render one lucide [tag, attrs] primitive as the matching Konva shape. */
+function GraphicPrimitive({
+  tag,
+  attrs,
+  stroke,
+  strokeWidth,
+  fillProps,
+  filled,
+}: {
+  tag: string;
+  attrs: Record<string, string | number>;
+  stroke: string | undefined;
+  strokeWidth: number;
+  fillProps: ReturnType<typeof toKonvaFill>;
+  filled: boolean;
+}) {
+  const strokeProps = filled
+    ? fillProps
+    : { stroke, strokeWidth, lineCap: 'round' as const, lineJoin: 'round' as const };
+  switch (tag) {
+    case 'path':
+      return <Path data={String(attrs.d ?? '')} {...strokeProps} />;
+    case 'circle':
+      return <Circle x={num(attrs.cx)} y={num(attrs.cy)} radius={num(attrs.r)} {...strokeProps} />;
+    case 'ellipse':
+      return (
+        <Ellipse x={num(attrs.cx)} y={num(attrs.cy)} radiusX={num(attrs.rx)} radiusY={num(attrs.ry)} {...strokeProps} />
+      );
+    case 'rect':
+      return (
+        <Rect
+          x={num(attrs.x)}
+          y={num(attrs.y)}
+          width={num(attrs.width)}
+          height={num(attrs.height)}
+          cornerRadius={num(attrs.rx)}
+          {...strokeProps}
+        />
+      );
+    case 'line':
+      return <Line points={[num(attrs.x1), num(attrs.y1), num(attrs.x2), num(attrs.y2)]} {...strokeProps} />;
+    case 'polyline':
+    case 'polygon': {
+      const pts = String(attrs.points ?? '')
+        .trim()
+        .split(/[\s,]+/)
+        .map(Number);
+      return <Line points={pts} closed={tag === 'polygon'} {...strokeProps} />;
+    }
+    default:
+      return null;
+  }
+}
+
+export const GraphicLayerNode = forwardRef<Konva.Group, LayerNodeProps>(function GraphicLayerNode(
+  { layer, stageSize, draggable, onSelect, onChange },
+  ref,
+) {
+  const g = layer as GraphicLayer;
+  const { onDragEnd, onTransformEnd } = useTransformHandlers(layer, stageSize, onChange);
+  const box = (g.size ?? 0.3) * stageSize * g.scale;
+  const vb = g.viewBox || 24;
+  const s = box / vb;
+  const filled = !g.strokeMode;
+  const fillProps = toKonvaFill(g.color, vb, vb);
+  const strokeColor = typeof g.color === 'string' ? g.color : '#16140F';
+  // lucide stroke width is in viewBox units; keep it proportional.
+  const sw = g.strokeWidth || 2;
+
+  return (
+    <Group
+      ref={ref as never}
+      x={toPx(g.x, stageSize)}
+      y={toPx(g.y, stageSize)}
+      rotation={g.rotation}
+      opacity={g.opacity}
+      scaleX={s}
+      scaleY={s}
+      offsetX={vb / 2}
+      offsetY={vb / 2}
+      draggable={draggable}
+      onClick={onSelect}
+      onTap={onSelect}
+      onDragEnd={onDragEnd}
+      onTransformEnd={onTransformEnd}
+    >
+      {g.nodes.map((node, i) => (
+        <GraphicPrimitive
+          key={i}
+          tag={node[0]}
+          attrs={node[1]}
+          stroke={strokeColor}
+          strokeWidth={sw}
+          fillProps={fillProps}
+          filled={filled}
+        />
+      ))}
+    </Group>
+  );
 });

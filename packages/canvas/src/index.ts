@@ -8,6 +8,8 @@ export {
   addTextLayer,
   addImageLayer,
   addShapeLayer,
+  addGraphicLayer,
+  addEmojiLayer,
   removeLayer,
   reorderLayer,
   moveLayerToIndex,
