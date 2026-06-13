@@ -8,11 +8,12 @@ export {
   SHIRT_COLORS,
   FONTS,
   FONT_IDS,
+  fontFamilyById,
   EXPORT_PRESETS,
   EXPORT_PRESET_IDS,
   MAX_UPLOAD_BYTES,
 } from './constants/shirt.js';
-export type { ShirtTypeName } from './constants/shirt.js';
+export type { ShirtTypeName, FontDef } from './constants/shirt.js';
 
 // Canvas scene schema (shared by editor, autosave, exporter)
 export {
@@ -20,15 +21,30 @@ export {
   LayerSchema,
   TextLayerSchema,
   ImageLayerSchema,
+  ShapeLayerSchema,
+  GradientSchema,
+  FillSchema,
+  FilterSchema,
+  FILTER_KINDS,
+  ShapeKindSchema,
+  SHAPE_KINDS,
   ShirtTypeSchema,
   SceneSide,
   emptyScene,
+} from './schemas/scene.js';
+export type {
+  Gradient,
+  Fill,
+  FilterKind,
+  ShapeKind,
+  ShapeLayer,
 } from './schemas/scene.js';
 
 // Domain schemas
 export {
   SellerSchema,
   PublicBrandSchema,
+  StorefrontConfig,
   BrandColors,
   SellerRole,
   SessionSchema,
@@ -40,8 +56,10 @@ export {
   AssetKind,
   ColorSchema,
   ColorScope,
+  MaterialSchema,
+  MaterialScope,
 } from './schemas/domain.js';
-export type { Color } from './schemas/domain.js';
+export type { Color, Material } from './schemas/domain.js';
 
 // API wire schemas
 export * from './schemas/api.js';

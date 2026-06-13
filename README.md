@@ -32,7 +32,7 @@ cp apps/admin-web/.env.example    apps/admin-web/.env
 cp apps/website/.env.example      apps/website/.env
 
 # In separate terminals
-pnpm -F @repo/main-backend dev    # http://localhost:8081
+pnpm -F @repo/main-backend dev    # http://localhost:9091
 pnpm -F @repo/web dev             # http://localhost:5173
 ```
 

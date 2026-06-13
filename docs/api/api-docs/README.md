@@ -4,7 +4,7 @@ Complete reference for the Shirtify MVP backend (`apps/main-backend`). Every
 endpoint below is implemented, contract-tested, and validated end-to-end against
 an in-memory MongoDB (19 integration tests, all green).
 
-- **Base URL (dev):** `http://localhost:8081`
+- **Base URL (dev):** `http://localhost:9091`
 - **Prefix:** all routes under `/api/v1`
 - **Auth:** seller routes require `Authorization: Bearer <access_token>`. Public
   customer/storefront routes are gated by the link **token** or **slug** instead.
@@ -41,6 +41,10 @@ Error:
 ---
 
 ## Auth
+
+> `/auth/login` and `/auth/register` are **rate-limited per client IP** (login:
+> 10 / 15 min; register: 20 / hour). Exceeding the cap → `429 rate_limited` with a
+> `Retry-After` header.
 
 ### POST `/api/v1/auth/register`
 Create a seller account. A unique `public_slug` is derived from the business name.
@@ -86,8 +90,15 @@ blank front+back design.
 { "customer_name": "Tobi", "shirt_type": "hoodie", "shirt_color": "black",
   "allowed_colors": ["black","white"], "price_quoted": 1500000, "notes": "elegant" }
 ```
-`shirt_type` ∈ `tee|hoodie|polo|oversized`. `price_quoted` is **integer minor
-units** (kobo/cents). All except `shirt_type`/`shirt_color` are optional.
+`shirt_type` ∈ `tee|hoodie|polo|oversized`. `shirt_color` (and every
+`allowed_colors` slug) **must be a colour available to this seller** — a platform
+colour or one she added (see [Colours](#colours-seller-)). Unknown colours →
+`400 validation_error` on `shirt_color`. `price_quoted` is **integer minor units**
+(kobo/cents). All except `shirt_type`/`shirt_color` are optional.
+
+**Header (optional):** `Idempotency-Key: <opaque>` — a retry with the same key
++ seller returns the **original** session instead of creating a duplicate. Keys
+expire after 24h.
 
 **201** `{ "data": { "session": Session } }` → customer link is `/c/{session.token}`.
 
@@ -181,10 +192,10 @@ Public storefront for a seller.
 { "data": {
   "brand": PublicBrand,
   "shirt_types": ["tee","hoodie","polo","oversized"],
-  "shirt_colors": ["white","black","sand", …]
+  "shirt_colors": ["white","black","sand", …]   // THIS seller's colours (platform ∪ her own)
 } }
 ```
-**Errors:** `404` (unknown slug).
+`shirt_colors` is resolved per-seller, not a global list. **Errors:** `404` (unknown slug).
 
 ### POST `/api/v1/s/:slug/start`
 Cold walk-in: create a `kind:"public"` session and return its token. Drops the
@@ -203,6 +214,35 @@ receive a "New design submitted" push (best-effort; dead subscriptions are prune
 
 **Body** `{ "endpoint": "https://…", "keys": { "p256dh": "…", "auth": "…" } }`
 → **204**. Requires `VAPID_*` env to actually deliver (no-op without).
+
+---
+
+## Colours (seller, 🔒)
+
+Shirt base colours are **data, not a hardcoded enum**. There are **platform**
+colours (seeded defaults, available to everyone) and **seller** colours (her own
+stock). `shirt_color` on a session/storefront-start must be a colour available to
+that seller (platform ∪ her own). The platform set is seeded on boot from the 8
+curated defaults; sellers extend their own set at runtime.
+
+### GET `/api/v1/colors`
+List the colours available to the seller (platform + her own).
+**200** `{ "data": { "colors": [ Color, … ] } }`.
+
+### POST `/api/v1/colors`
+Add one of the seller's own colours.
+**Body** `{ "label": "Owambe Gold", "hex": "#d4af37", "slug": "owambe-gold" }`
+(`slug` optional — derived from `label`; `hex` must match `#rgb`/`#rrggbb`).
+**201** `{ "data": { "color": Color } }`. **Errors:** `409 conflict` (slug taken) ·
+`400` (bad hex).
+
+### DELETE `/api/v1/colors/:id`
+Remove one of the seller's own colours. **204**. **Errors:** `404` if the id is a
+platform colour or not hers (platform colours can't be deleted by sellers).
+
+```ts
+Color = { id, scope:'platform'|'seller', seller_id|null, slug, label, hex, created_at }
+```
 
 ---
 

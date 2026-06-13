@@ -7,6 +7,7 @@ import {
   DesignSchema,
   PublicSessionSchema,
   PublicBrandSchema,
+  MaterialSchema,
   SessionStatus,
 } from './domain.js';
 import { ShirtTypeSchema, SceneSchema } from './scene.js';
@@ -54,14 +55,21 @@ export const CreateSessionBody = z.object({
   customer_name: z.string().min(1).optional(),
   shirt_type: ShirtTypeSchema,
   shirt_color: z.string().min(1),
+  /** Optional custom material slug; when set, overrides the built-in type backdrop. */
+  material_slug: z.string().optional(),
   allowed_colors: z.array(z.string()).optional(),
   price_quoted: z.number().int().nonnegative().optional(),
   notes: z.string().optional(),
 });
 export type CreateSessionBody = z.infer<typeof CreateSessionBody>;
 
+// Shirt type/colour/material are editable after creation; status → archived.
 export const PatchSessionBody = z.object({
   status: z.literal('archived').optional(),
+  shirt_type: ShirtTypeSchema.optional(),
+  shirt_color: z.string().min(1).optional(),
+  material_slug: z.string().nullable().optional(),
+  customer_name: z.string().min(1).optional(),
 });
 export type PatchSessionBody = z.infer<typeof PatchSessionBody>;
 
@@ -120,12 +128,15 @@ export const StorefrontResponse = z.object({
   brand: PublicBrandSchema,
   shirt_types: z.array(ShirtTypeSchema),
   shirt_colors: z.array(z.string()),
+  /** Materials the seller chose to show (platform ∪ her own, filtered by config). */
+  materials: z.array(MaterialSchema),
 });
 export type StorefrontResponse = z.infer<typeof StorefrontResponse>;
 
 export const StartSessionBody = z.object({
   shirt_type: ShirtTypeSchema,
   shirt_color: z.string().min(1),
+  material_slug: z.string().optional(),
 });
 export type StartSessionBody = z.infer<typeof StartSessionBody>;
 
@@ -176,3 +187,31 @@ export const CreateColorBody = z.object({
     .optional(),
 });
 export type CreateColorBody = z.infer<typeof CreateColorBody>;
+
+const hex = z.string().regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, 'must be a hex colour');
+
+// ---- Brand / storefront config (seller-managed) ----
+export const UpdateBrandBody = z.object({
+  business_name: z.string().min(1).max(80).optional(),
+  description: z.string().max(500).nullable().optional(),
+  welcome_voice: z.string().max(280).nullable().optional(),
+  brand_logo_key: z.string().nullable().optional(),
+  storefront_color: hex.nullable().optional(),
+  storefront_font: z.string().nullable().optional(),
+  visible_materials: z.array(z.string()).nullable().optional(),
+});
+export type UpdateBrandBody = z.infer<typeof UpdateBrandBody>;
+
+// ---- Materials (seller-managed) ----
+export const CreateMaterialBody = z.object({
+  label: z.string().min(1).max(60),
+  /** R2 key of the uploaded material photo. */
+  image_key: z.string().min(1),
+  slug: z
+    .string()
+    .regex(/^[a-z0-9-]+$/, 'lowercase letters, digits, hyphens only')
+    .min(1)
+    .max(60)
+    .optional(),
+});
+export type CreateMaterialBody = z.infer<typeof CreateMaterialBody>;

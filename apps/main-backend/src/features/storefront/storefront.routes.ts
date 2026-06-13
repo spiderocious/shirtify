@@ -24,7 +24,11 @@ router.post(
   asyncHandler(async (req, res) => {
     const slug = requireParam(req, 'slug');
     const body = StartSessionBody.parse(req.body);
-    const result = await startPublicSession(slug, body);
+    const result = await startPublicSession(slug, {
+      shirt_type: body.shirt_type,
+      shirt_color: body.shirt_color,
+      ...(body.material_slug !== undefined && { material_slug: body.material_slug }),
+    });
     return ResponseUtil.created(res, result);
   }),
 );

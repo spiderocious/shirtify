@@ -1,7 +1,7 @@
 # QA Handoff — Shirtify main-backend
 
 **Date:** 2026-06-12
-**Base URL:** `http://localhost:8081/api/v1`
+**Base URL:** `http://localhost:9091/api/v1`
 **Stack:** Express + MongoDB (Mongoose), JWT auth (access/refresh), AsyncLocalStorage request context
 **Tester:** Backend QA (code-flow audit + live curl/mongosh execution)
 
@@ -11,7 +11,7 @@
 
 | Variable | Value |
 |----------|-------|
-| `PORT` | 8081 |
+| `PORT` | 9091 |
 | `MONGODB_URI` | `mongodb://127.0.0.1:27017/shirtify` |
 | `JWT_ACCESS_EXPIRES_IN` | 15m |
 | `JWT_REFRESH_EXPIRES_IN` | 30d |

@@ -40,6 +40,41 @@ export const BrandColors = z.object({
 });
 export type BrandColors = z.infer<typeof BrandColors>;
 
+/**
+ * A material the seller offers (tee, hoodie, or a custom one she uploads a photo
+ * of). Built-in materials are seeded platform-wide; sellers add their own with an
+ * uploaded image. The canvas shows `image_key` as the backdrop when present;
+ * built-ins with no image fall back to the vector silhouette keyed by `slug`.
+ */
+export const MaterialScope = z.enum(['platform', 'seller']);
+export type MaterialScope = z.infer<typeof MaterialScope>;
+
+export const MaterialSchema = z.object({
+  id: z.string(),
+  scope: MaterialScope,
+  seller_id: z.string().nullable(),
+  slug: z.string(),
+  label: z.string(),
+  /** R2 key of the seller's uploaded photo; null for built-in vector materials. */
+  image_key: z.string().nullable(),
+  /** Built-in silhouette key (tee/hoodie/polo/oversized) when image_key is null. */
+  builtin_shape: z.string().nullable(),
+  created_at: z.string(),
+});
+export type Material = z.infer<typeof MaterialSchema>;
+
+/** Storefront presentation config, set by the seller. */
+export const StorefrontConfig = z.object({
+  description: z.string().nullable(),
+  /** Accent colour for the storefront page. */
+  storefront_color: z.string().nullable(),
+  /** Display font id (one of FONTS) for the storefront heading. */
+  storefront_font: z.string().nullable(),
+  /** Material slugs to show on the storefront; null = show all. */
+  visible_materials: z.array(z.string()).nullable(),
+});
+export type StorefrontConfig = z.infer<typeof StorefrontConfig>;
+
 /** Seller as exposed to authed seller surfaces (no password hash). */
 export const SellerSchema = z.object({
   id: z.string(),
@@ -49,6 +84,10 @@ export const SellerSchema = z.object({
   brand_logo_key: z.string().nullable(),
   brand_colors: BrandColors.nullable(),
   welcome_voice: z.string().nullable(),
+  description: z.string().nullable(),
+  storefront_color: z.string().nullable(),
+  storefront_font: z.string().nullable(),
+  visible_materials: z.array(z.string()).nullable(),
   role: SellerRole,
   created_at: z.string(), // ISO 8601
 });
@@ -61,6 +100,9 @@ export const PublicBrandSchema = z.object({
   brand_logo_key: z.string().nullable(),
   brand_colors: BrandColors.nullable(),
   welcome_voice: z.string().nullable(),
+  description: z.string().nullable(),
+  storefront_color: z.string().nullable(),
+  storefront_font: z.string().nullable(),
 });
 export type PublicBrand = z.infer<typeof PublicBrandSchema>;
 
@@ -78,6 +120,8 @@ export const SessionSchema = z.object({
   customer_name: z.string().nullable(),
   shirt_type: ShirtTypeSchema,
   shirt_color: z.string(),
+  /** Optional custom material (slug) the session uses instead of a built-in type. */
+  material_slug: z.string().nullable(),
   allowed_colors: z.array(z.string()).nullable(),
   price_quoted: z.number().int().nullable(), // minor units (kobo/cents)
   notes: z.string().nullable(),
@@ -95,6 +139,7 @@ export const PublicSessionSchema = SessionSchema.pick({
   customer_name: true,
   shirt_type: true,
   shirt_color: true,
+  material_slug: true,
   allowed_colors: true,
   status: true,
 });
@@ -111,7 +156,7 @@ export const DesignSchema = z.object({
 });
 export type Design = z.infer<typeof DesignSchema>;
 
-export const AssetKind = z.enum(['upload', 'export', 'logo', 'ai']);
+export const AssetKind = z.enum(['upload', 'export', 'logo', 'ai', 'material']);
 export type AssetKind = z.infer<typeof AssetKind>;
 
 export const AssetSchema = z.object({

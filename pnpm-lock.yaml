@@ -208,6 +208,9 @@ importers:
       '@shirtify/api':
         specifier: workspace:*
         version: link:../../packages/api
+      '@shirtify/canvas':
+        specifier: workspace:*
+        version: link:../../packages/canvas
       '@shirtify/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -217,6 +220,12 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.62.0
         version: 5.100.10(react@19.2.6)
+      konva:
+        specifier: ^9.3.18
+        version: 9.3.22
+      ky:
+        specifier: ^1.7.4
+        version: 1.14.3
       meemaw:
         specifier: ^1.0.2
         version: 1.0.2(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -226,6 +235,9 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.2.6(react@19.2.6)
+      react-konva:
+        specifier: ^19.0.3
+        version: 19.2.5(@types/react@19.2.14)(konva@9.3.22)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       react-router-dom:
         specifier: ^6.28.0
         version: 6.30.3(react-dom@19.2.6(react@19.2.6))(react@19.2.6)

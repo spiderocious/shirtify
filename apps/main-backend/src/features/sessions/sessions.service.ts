@@ -9,6 +9,7 @@ import {
 } from '@shirtify/core';
 
 import { assertColorAvailable } from '@features/colors/colors.service.js';
+import { assertMaterialAvailable } from '@features/materials/materials.service.js';
 import { NotFoundError } from '@lib/errors.js';
 import { getRepos } from '@repos/index.js';
 
@@ -45,10 +46,11 @@ export const createSession = async (
   await assertColorAvailable(sellerId, input.shirt_color);
   if (input.allowed_colors) {
     for (const slug of input.allowed_colors) {
-       
+
       await assertColorAvailable(sellerId, slug);
     }
   }
+  if (input.material_slug) await assertMaterialAvailable(sellerId, input.material_slug);
   const token = await uniqueToken();
   const session = await repos.sessions.create({
     seller_id: sellerId,
@@ -57,6 +59,7 @@ export const createSession = async (
     ...(input.customer_name !== undefined && { customer_name: input.customer_name }),
     shirt_type: input.shirt_type,
     shirt_color: input.shirt_color,
+    ...(input.material_slug !== undefined && { material_slug: input.material_slug }),
     ...(input.allowed_colors !== undefined && { allowed_colors: input.allowed_colors }),
     ...(input.price_quoted !== undefined && { price_quoted: input.price_quoted }),
     ...(input.notes !== undefined && { notes: input.notes }),
@@ -116,5 +119,48 @@ export const archiveSession = async (sellerId: string, id: string): Promise<Sess
 
   const updated = await repos.sessions.patch(id, { status: 'archived' });
   if (!updated) throw new NotFoundError('Session');
+  return updated;
+};
+
+/**
+ * Edit a session's shirt type / colour / material after creation. Validates the
+ * new colour + material against the seller's catalogue, patches the session, and
+ * mirrors the change into both design scenes so the canvas reflects it.
+ */
+export const editSession = async (
+  sellerId: string,
+  id: string,
+  patch: {
+    shirt_type?: Session['shirt_type'];
+    shirt_color?: string;
+    material_slug?: string | null;
+    customer_name?: string;
+  },
+): Promise<Session> => {
+  const repos = getRepos();
+  const session = await repos.sessions.byId(id);
+  if (!session || session.seller_id !== sellerId) throw new NotFoundError('Session');
+
+  if (patch.shirt_color !== undefined) await assertColorAvailable(sellerId, patch.shirt_color);
+  if (patch.material_slug) await assertMaterialAvailable(sellerId, patch.material_slug);
+
+  const updated = await repos.sessions.patch(id, patch);
+  if (!updated) throw new NotFoundError('Session');
+
+  // Mirror shirt type/colour into the design scenes (so the canvas backdrop updates).
+  const design = await repos.designs.bySessionId(id);
+  if (design) {
+    const applyShirt = (scene: Design['canvas_front']): Design['canvas_front'] => ({
+      ...scene,
+      shirt: {
+        ...scene.shirt,
+        type: updated.shirt_type,
+        color: updated.shirt_color,
+        ...(updated.material_slug !== null && { materialId: updated.material_slug }),
+      },
+    });
+    await repos.designs.saveCanvas(id, applyShirt(design.canvas_front), applyShirt(design.canvas_back));
+  }
+
   return updated;
 };

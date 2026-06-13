@@ -8,6 +8,7 @@ const sessionSchema = new Schema(
     customer_name: { type: String, default: null },
     shirt_type: { type: String, enum: ['tee', 'hoodie', 'polo', 'oversized'], required: true },
     shirt_color: { type: String, required: true },
+    material_slug: { type: String, default: null },
     allowed_colors: { type: [String], default: null },
     price_quoted: { type: Number, default: null },
     notes: { type: String, default: null },

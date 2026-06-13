@@ -27,26 +27,60 @@ export const SHIRT_COLORS: ReadonlyArray<{ id: string; label: string; hex: strin
 ];
 
 /**
- * The 12 print-safe fonts the text tool offers. The canvas renders these in the
- * browser and the exporter must register the same families server-side, so this
- * list is the contract between both.
+ * The fonts the text tool offers. The canvas renders by `family` (the CSS
+ * font-family / Konva fontFamily), so every font here MUST be loaded for it to
+ * reflect — the web app dynamically imports `pkg` (its @fontsource package) and
+ * the exporter registers the same families server-side. `id` is what's stored on
+ * a layer; `family` is the contract between editor + exporter.
  */
-export const FONTS: ReadonlyArray<{ id: string; label: string; stack: string }> = [
-  { id: 'archivo-black', label: 'Archivo Black', stack: '"Archivo Black", sans-serif' },
-  { id: 'space-grotesk', label: 'Space Grotesk', stack: '"Space Grotesk", sans-serif' },
-  { id: 'inter', label: 'Inter', stack: 'Inter, system-ui, sans-serif' },
-  { id: 'anton', label: 'Anton', stack: 'Anton, sans-serif' },
-  { id: 'bebas-neue', label: 'Bebas Neue', stack: '"Bebas Neue", sans-serif' },
-  { id: 'oswald', label: 'Oswald', stack: 'Oswald, sans-serif' },
-  { id: 'playfair', label: 'Playfair Display', stack: '"Playfair Display", serif' },
-  { id: 'lobster', label: 'Lobster', stack: 'Lobster, cursive' },
-  { id: 'pacifico', label: 'Pacifico', stack: 'Pacifico, cursive' },
-  { id: 'permanent-marker', label: 'Permanent Marker', stack: '"Permanent Marker", cursive' },
-  { id: 'righteous', label: 'Righteous', stack: 'Righteous, sans-serif' },
-  { id: 'jetbrains-mono', label: 'JetBrains Mono', stack: '"JetBrains Mono", monospace' },
+export interface FontDef {
+  id: string;
+  label: string;
+  family: string;
+  /** @fontsource package to load in the browser. */
+  pkg: string;
+  category: 'sans' | 'display' | 'serif' | 'script' | 'mono' | 'handwriting';
+}
+
+export const FONTS: ReadonlyArray<FontDef> = [
+  // Sans
+  { id: 'inter', label: 'Inter', family: 'Inter', pkg: '@fontsource/inter', category: 'sans' },
+  { id: 'space-grotesk', label: 'Space Grotesk', family: 'Space Grotesk', pkg: '@fontsource/space-grotesk', category: 'sans' },
+  { id: 'montserrat', label: 'Montserrat', family: 'Montserrat', pkg: '@fontsource/montserrat', category: 'sans' },
+  { id: 'poppins', label: 'Poppins', family: 'Poppins', pkg: '@fontsource/poppins', category: 'sans' },
+  { id: 'work-sans', label: 'Work Sans', family: 'Work Sans', pkg: '@fontsource/work-sans', category: 'sans' },
+  { id: 'dm-sans', label: 'DM Sans', family: 'DM Sans', pkg: '@fontsource/dm-sans', category: 'sans' },
+  // Display / heavy
+  { id: 'archivo-black', label: 'Archivo Black', family: 'Archivo Black', pkg: '@fontsource/archivo-black', category: 'display' },
+  { id: 'anton', label: 'Anton', family: 'Anton', pkg: '@fontsource/anton', category: 'display' },
+  { id: 'bebas-neue', label: 'Bebas Neue', family: 'Bebas Neue', pkg: '@fontsource/bebas-neue', category: 'display' },
+  { id: 'oswald', label: 'Oswald', family: 'Oswald', pkg: '@fontsource/oswald', category: 'display' },
+  { id: 'righteous', label: 'Righteous', family: 'Righteous', pkg: '@fontsource/righteous', category: 'display' },
+  { id: 'bungee', label: 'Bungee', family: 'Bungee', pkg: '@fontsource/bungee', category: 'display' },
+  { id: 'titan-one', label: 'Titan One', family: 'Titan One', pkg: '@fontsource/titan-one', category: 'display' },
+  { id: 'fredoka', label: 'Fredoka', family: 'Fredoka', pkg: '@fontsource/fredoka', category: 'display' },
+  { id: 'alfa-slab', label: 'Alfa Slab One', family: 'Alfa Slab One', pkg: '@fontsource/alfa-slab-one', category: 'display' },
+  // Serif
+  { id: 'playfair', label: 'Playfair Display', family: 'Playfair Display', pkg: '@fontsource/playfair-display', category: 'serif' },
+  { id: 'merriweather', label: 'Merriweather', family: 'Merriweather', pkg: '@fontsource/merriweather', category: 'serif' },
+  { id: 'abril-fatface', label: 'Abril Fatface', family: 'Abril Fatface', pkg: '@fontsource/abril-fatface', category: 'serif' },
+  // Script / handwriting
+  { id: 'lobster', label: 'Lobster', family: 'Lobster', pkg: '@fontsource/lobster', category: 'script' },
+  { id: 'pacifico', label: 'Pacifico', family: 'Pacifico', pkg: '@fontsource/pacifico', category: 'script' },
+  { id: 'dancing-script', label: 'Dancing Script', family: 'Dancing Script', pkg: '@fontsource/dancing-script', category: 'script' },
+  { id: 'caveat', label: 'Caveat', family: 'Caveat', pkg: '@fontsource/caveat', category: 'handwriting' },
+  { id: 'permanent-marker', label: 'Permanent Marker', family: 'Permanent Marker', pkg: '@fontsource/permanent-marker', category: 'handwriting' },
+  { id: 'satisfy', label: 'Satisfy', family: 'Satisfy', pkg: '@fontsource/satisfy', category: 'script' },
+  // Mono
+  { id: 'jetbrains-mono', label: 'JetBrains Mono', family: 'JetBrains Mono', pkg: '@fontsource/jetbrains-mono', category: 'mono' },
+  { id: 'space-mono', label: 'Space Mono', family: 'Space Mono', pkg: '@fontsource/space-mono', category: 'mono' },
 ];
 
 export const FONT_IDS = FONTS.map((f) => f.id);
+
+/** Resolve a font id → its CSS family (fallback to a generic sans). */
+export const fontFamilyById = (id: string): string =>
+  FONTS.find((f) => f.id === id)?.family ?? 'Inter, system-ui, sans-serif';
 
 /**
  * Export size presets. Users pick one of these or a custom { w, h, dpi }.
