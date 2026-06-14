@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 512" width="720" height="512">
+  <rect width="720" height="512" fill="#fbf7ec"/>
+  <rect x="6" y="6" width="708" height="500" fill="none" stroke="#16140f" stroke-width="10"/>
+
+  <!-- Shirt icon (left, smaller) -->
+  <g transform="translate(50, 80) scale(0.75)">
+    <path d="
+      M 100 148 L 148 92 L 204 122
+      C 218 142 236 154 256 158
+      C 276 154 294 142 308 122
+      L 364 92 L 412 148 L 452 194
+      L 406 232 L 406 418 L 106 418
+      L 106 232 L 60 194 Z
+    " fill="#c6f24e" stroke="#16140f" stroke-width="12" stroke-linejoin="round"/>
+    <line x1="140" y1="280" x2="372" y2="280" stroke="#16140f" stroke-width="8" opacity="0.4"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="380" y="310" font-family="'Arial Black', 'Archivo Black', sans-serif"
+        font-size="88" font-weight="900" text-anchor="middle"
+        letter-spacing="-2" fill="#16140f">SHIRTIFY</text>
+  <!-- Lime underline -->
+  <rect x="220" y="326" width="320" height="14" fill="#c6f24e" stroke="#16140f" stroke-width="3"/>
+</svg>

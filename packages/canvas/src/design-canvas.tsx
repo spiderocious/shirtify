@@ -134,6 +134,19 @@ export const DesignCanvas = forwardRef<CanvasHandle, DesignCanvasProps>(function
       const res = await fetch(dataUrl);
       return res.blob();
     },
+    snapshot: (pixelRatio = 2): string | null => {
+      const stage = stageRef.current;
+      if (!stage) return null;
+      // Hide selection chrome so the snapshot is just the shirt + design.
+      const tr = trRef.current;
+      const trVisible = tr?.visible() ?? false;
+      tr?.visible(false);
+      tr?.getLayer()?.batchDraw();
+      const dataUrl = stage.toDataURL({ pixelRatio, mimeType: 'image/png' });
+      tr?.visible(trVisible);
+      tr?.getLayer()?.batchDraw();
+      return dataUrl;
+    },
     destroy: () => undefined,
   }));
 

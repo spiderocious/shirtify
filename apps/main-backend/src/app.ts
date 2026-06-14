@@ -45,7 +45,13 @@ export const buildApp = (): express.Express => {
   app.use(requestIdMiddleware);
   app.use(requestLogMiddleware);
 
-  app.use(express.json({ limit: '1mb' }));
+  // Global JSON limit stays tight (1mb), but skip the AI subtree — those routes
+  // carry base64 images and mount their own larger parser (see features/ai).
+  const jsonParser = express.json({ limit: '1mb' });
+  app.use((req, res, next) => {
+    if (req.path.includes('/ai/')) return next();
+    return jsonParser(req, res, next);
+  });
   app.use(express.urlencoded({ extended: true, limit: '1mb' }));
   app.use(compression());
 

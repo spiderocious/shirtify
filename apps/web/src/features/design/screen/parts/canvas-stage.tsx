@@ -11,7 +11,7 @@ const SLUG_HEX = new Map(SHIRT_COLORS.map((c) => [c.id, c.hex]));
 
 /** The editing surface — DesignCanvas + a quick on-canvas shirt-colour row. */
 export function CanvasStage() {
-  const { scenes, side, activeScene, context, selectedLayerId, selectLayer, replaceScenes, setShirtColor } =
+  const { scenes, side, activeScene, context, selectedLayerId, selectLayer, replaceScenes, setShirtColor, canvasRef } =
     useDesign();
 
   // Colours the customer may switch between (seller's allowed set), as hexes.
@@ -25,6 +25,7 @@ export function CanvasStage() {
     <div className="flex w-full flex-col items-center gap-3 bg-paper-deep p-3 sm:p-4">
       <div className="w-full max-w-[520px] border-3 border-ink bg-paper shadow-pop">
         <DesignCanvas
+          ref={canvasRef}
           front={scenes.front}
           back={scenes.back}
           side={side}

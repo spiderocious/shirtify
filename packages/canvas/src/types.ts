@@ -38,5 +38,10 @@ export interface CanvasHandle {
   getScenes(): { front: Scene; back: Scene };
   /** Client-side render of the current side to a PNG blob (low-res preview). */
   toPNG(opts: ToPNGOptions): Promise<Blob>;
+  /**
+   * PNG data URL of the current side, with selection chrome hidden — used as the
+   * design snapshot fed to AI try-on. Returns null if the stage isn't ready.
+   */
+  snapshot(pixelRatio?: number): string | null;
   destroy(): void;
 }

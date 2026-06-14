@@ -24,6 +24,7 @@ export const mount = (el: HTMLElement, opts: CanvasOptions): CanvasHandle => {
       if (!handleRef.current) throw new Error('canvas not mounted');
       return handleRef.current.toPNG(o);
     },
+    snapshot: (pixelRatio) => handleRef.current?.snapshot(pixelRatio) ?? null,
     destroy: () => root.unmount(),
   };
 };

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" fill="#fbf7ec"/>
+  <!-- Hard ink border -->
+  <rect x="6" y="6" width="500" height="500" fill="none" stroke="#16140f" stroke-width="10"/>
+  <!-- Offset shadow rect (neobrutalist signature) -->
+  <rect x="16" y="16" width="500" height="500" fill="none" stroke="#16140f" stroke-width="4" opacity="0.12"/>
+
+  <!-- Shirt silhouette: clean, iconic -->
+  <!-- Collar V -->
+  <path d="
+    M 100 148
+    L 148 92
+    L 204 122
+    C 218 142 236 154 256 158
+    C 276 154 294 142 308 122
+    L 364 92
+    L 412 148
+    L 452 194
+    L 406 232
+    L 406 418
+    L 106 418
+    L 106 232
+    L 60 194
+    Z
+  " fill="#c6f24e" stroke="#16140f" stroke-width="12" stroke-linejoin="round" stroke-linecap="round"/>
+
+  <!-- Simple seam line across chest -->
+  <line x1="140" y1="280" x2="372" y2="280" stroke="#16140f" stroke-width="8" stroke-linecap="round" opacity="0.4"/>
+</svg>

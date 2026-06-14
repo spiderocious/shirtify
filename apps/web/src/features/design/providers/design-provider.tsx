@@ -8,6 +8,7 @@ import {
   reorderLayer as reorderLayerOp,
   moveLayerToIndex as moveLayerToIndexOp,
   type NewTextLayerInput,
+  type CanvasHandle,
 } from '@shirtify/canvas';
 import {
   applyTemplate as applyTemplateOp,
@@ -20,7 +21,15 @@ import {
   type DesignTemplate,
   type PublicSessionResponse,
 } from '@shirtify/core';
-import { createContext, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 
 import { useSaveDesign } from '../api/use-save-design.ts';
 import { useDebouncedCallback } from '../utils/use-debounced-callback.ts';
@@ -52,6 +61,10 @@ interface DesignContextValue {
   setSceneFilter: (filter: FilterKind) => void;
   applyTemplate: (template: DesignTemplate) => void;
   replaceScenes: (next: { front: Scene; back: Scene }) => void;
+  /** Ref the canvas attaches to; lets tools snapshot the live stage (AI try-on). */
+  canvasRef: RefObject<CanvasHandle | null>;
+  /** PNG data URL of the current side with selection chrome hidden, or null. */
+  snapshot: () => string | null;
 }
 
 const DesignContext = createContext<DesignContextValue | null>(null);
@@ -74,6 +87,7 @@ export function DesignProvider({
   const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<SaveState>('idle');
   const latest = useRef(scenes);
+  const canvasRef = useRef<CanvasHandle | null>(null);
 
   const persist = useDebouncedCallback((next: { front: Scene; back: Scene }) => {
     setSaveState('saving');
@@ -158,6 +172,8 @@ export function DesignProvider({
     setSceneFilter: (filter) => updateActive((scene) => ({ ...scene, filter })),
     applyTemplate: (template) => updateActive((scene) => applyTemplateOp(scene, template)),
     replaceScenes: commit,
+    canvasRef,
+    snapshot: () => canvasRef.current?.snapshot() ?? null,
   };
 
   return <DesignContext.Provider value={value}>{children}</DesignContext.Provider>;
